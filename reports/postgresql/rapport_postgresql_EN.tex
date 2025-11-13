@@ -78,6 +78,21 @@ Below is a quick overview of the tools used for this analysis.
 
 \LaTeX{} is a document composition system that produces high-quality technical and scientific reports. We use \texttt{xelatex} for compilation. It is particularly suited for structuring, formatting, and presenting security analysis results clearly and professionally.
 
+\section{Methodology}
+
+The analysis for this report was conducted on \today. The data was gathered using the following open-source tools and commands:
+
+\begin{itemize}
+    \item \textbf{Lifecycle Data:} PostgreSQL version lifecycle information was retrieved using the \texttt{geol} CLI with the command:
+    \begin{verbatim}
+        geol product extended psql -n0
+    \end{verbatim}
+    \item \textbf{Vulnerability Scanning:} Docker images for each major PostgreSQL version were scanned for vulnerabilities using the \texttt{trivy} CLI. An example command for a single version is:
+    \begin{verbatim}
+        trivy image postgres:18
+    \end{verbatim}
+\end{itemize}
+
 \newpage
 
 \section{Data Analysis}

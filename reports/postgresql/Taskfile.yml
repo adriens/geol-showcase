@@ -4,6 +4,7 @@ tasks:
   default:
     cmds:
       - task: build
+      - task: to-jpeg
 
   build:
     desc: "Build the LaTeX report into a PDF using xelatex"
