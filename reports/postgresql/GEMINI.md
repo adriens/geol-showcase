@@ -4,7 +4,7 @@ This document outlines the steps taken by the Gemini CLI agent to update the Pos
 
 ## 1. Tool Identification and Versioning
 
-The following tools were identified and their versions retrieved for inclusion in the report:
+The following tools were identified and their versions retrieved *from the current shell environment* for inclusion in the report:
 
 *   **`geol`**: `geol version` (e.g., `1.3.0`)
 *   **`trivy`**: `trivy --version` (e.g., `0.67.2`, including Vulnerability DB version `2`)
