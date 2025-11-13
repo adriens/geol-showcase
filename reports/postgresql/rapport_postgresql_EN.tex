@@ -66,17 +66,17 @@ Below is a quick overview of the tools used for this analysis.
 
 \subsection{\texttt{geol}: The Lifecycle Guardian}
 
-\href{https://github.com/opt-nc/geol}{\texttt{geol}} is a tool that queries the \href{https://endoflife.date}{endoflife.date} API to instantly retrieve software End-of-Life dates.
+\href{https://github.com/opt-nc/geol}{\texttt{geol}} (version 1.3.0) is a tool that queries the \href{https://endoflife.date}{endoflife.date} API to instantly retrieve software End-of-Life dates.
 
 \subsection{\texttt{trivy}: The Vulnerability Scanner}
-\href{https://trivy.dev/}{\texttt{trivy}} is an open-source scanner that detects vulnerabilities (CVEs) in container images, file systems, and Git repositories.
+\href{https://trivy.dev/}{\texttt{trivy}} (version 0.67.2) is an open-source scanner that detects vulnerabilities (CVEs) in container images, file systems, and Git repositories. The vulnerability database is version 2.
 
 \subsection{\texttt{gemini-cli}: AI Assistant}
-\href{https://github.com/google-gemini/gemini-cli}{\texttt{gemini-cli}} is an open-source AI agent that brings Gemini's power directly to the terminal.
+\href{https://github.com/google-gemini/gemini-cli}{\texttt{gemini-cli}} (version 0.14.0) is an open-source AI agent that brings Gemini's power directly to the terminal.
 
 \subsection{\LaTeX{}: Report Generator}
 
-\LaTeX{} is a document composition system that produces high-quality technical and scientific reports. It is particularly suited for structuring, formatting, and presenting security analysis results clearly and professionally.
+\LaTeX{} (TeX Live 2023/Debian) is a document composition system that produces high-quality technical and scientific reports. We use \texttt{xelatex} for compilation. It is particularly suited for structuring, formatting, and presenting security analysis results clearly and professionally.
 
 \newpage
 
@@ -88,23 +88,23 @@ The first step is to determine which versions are officially supported.\\
 
 An unsupported version is a \textbf{gateway to unpatched vulnerabilities.}
 
-\begin{table}[h!]
+\begin{table}[htbp]
 \centering
 \caption{PostgreSQL Version Lifecycle}
 \label{tab:geol}
-\begin{tabular}{@{}lccc@{}}
+\begin{tabular}{@{}lccccc@{}}
 	
-	\textbf{Version} & \textbf{Release Date} & \textbf{End of Support (EOL)} & \textbf{Status} \\ \midrule
-\rowcolor{lightgreen} 18 & 2025-09-25 & 2030-11-14 & Supported \\
-\rowcolor{lightgreen} 17 & 2024-09-26 & 2029-11-08 & Supported \\
-\rowcolor{lightgreen} 16 & 2023-09-14 & 2028-11-09 & Supported \\
-\rowcolor{lightgreen} 15 & 2022-10-13 & 2027-11-11 & Supported \\
-\rowcolor{lightgreen} 14 & 2021-09-30 & 2026-11-12 & Supported \\
-\rowcolor{lightorange} 13 & 2020-09-24 & 2025-11-13 & Approaching End of Life \\ \midrule
-\rowcolor{lightred} 12 & 2019-10-03 & 2024-11-21 & \textbf{Unsupported} \\
-\rowcolor{lightred} 11 & 2018-10-18 & 2023-11-09 & \textbf{Unsupported} \\
-\rowcolor{lightred} 10 & 2017-10-05 & 2022-11-10 & \textbf{Unsupported} \\
-\rowcolor{lightred} 9.6 & 2016-09-29 & 2021-11-11 & \textbf{Unsupported} \\ \bottomrule
+	\textbf{Version} & \textbf{Release Date} & \textbf{Latest} & \textbf{Latest Release} & \textbf{End of Support (EOL)} & \textbf{Status} \\ \midrule
+\rowcolor{lightgreen} 18 & 2025-09-25 & 18.1 & 2025-11-10 & 2030-11-14 & Supported \\
+\rowcolor{lightgreen} 17 & 2024-09-26 & 17.7 & 2025-11-10 & 2029-11-08 & Supported \\
+\rowcolor{lightgreen} 16 & 2023-09-14 & 16.11 & 2025-11-10 & 2028-11-09 & Supported \\
+\rowcolor{lightgreen} 15 & 2022-10-13 & 15.15 & 2025-11-10 & 2027-11-11 & Supported \\
+\rowcolor{lightgreen} 14 & 2021-09-30 & 14.20 & 2025-11-10 & 2026-11-12 & Supported \\
+\rowcolor{lightred} 13 & 2020-09-24 & 13.23 & 2025-11-10 & 2025-11-13 & \textbf{Unsupported} \\ \midrule
+\rowcolor{lightred} 12 & 2019-10-03 & 12.22 & 2024-11-18 & 2024-11-21 & \textbf{Unsupported} \\
+\rowcolor{lightred} 11 & 2018-10-18 & 11.22 & 2023-11-06 & 2023-11-09 & \textbf{Unsupported} \\
+\rowcolor{lightred} 10 & 2017-10-05 & 10.23 & 2022-11-07 & 2022-11-10 & \textbf{Unsupported} \\
+\rowcolor{lightred} 9.6 & 2016-09-29 & 9.6.24 & 2021-11-08 & 2021-11-11 & \textbf{Unsupported} \\ \bottomrule
 \end{tabular}
 \end{table}
 
@@ -115,26 +115,26 @@ The second step is to analyze the "attack surface" of Docker images.
 
 Table \ref{tab:trivy} and Figure \ref{fig:vuln-chart} show the results.
 
-\begin{table}[h!]
+\begin{table}[htbp]
 \centering
 \caption{Vulnerability Summary by Version}
 \label{tab:trivy}
 \begin{tabular}{@{}lccccc@{}}
 	\textbf{Docker Tag} & \textbf{Critical} & \textbf{High} & \textbf{Medium} & \textbf{Low} & \textbf{Total} \\ \midrule
-\rowcolor{lightgreen} \texttt{postgres:18} & 0 & 1 & 3 & 97 & 101 \\
-\rowcolor{lightgreen} \texttt{postgres:17} & 0 & 1 & 3 & 97 & 101 \\
-\rowcolor{lightgreen} \texttt{postgres:16} & 0 & 1 & 3 & 97 & 102 \\
-\rowcolor{lightgreen} \texttt{postgres:15} & 0 & 1 & 3 & 97 & 102 \\
-\rowcolor{lightgreen} \texttt{postgres:14} & 0 & 1 & 3 & 97 & 102 \\
-\rowcolor{lightgreen} \texttt{postgres:13} & 0 & 1 & 3 & 97 & 102 \\ \midrule
-\rowcolor{lightorange} \texttt{postgres:12} & 5 & 33 & 56 & 129 & 225 \\
-\rowcolor{lightred} \texttt{postgres:11} & 3 & 35 & 12 & 47 & 97 \\
-\rowcolor{lightred} \texttt{postgres:10} & 3 & 35 & 12 & 47 & 97 \\
-\rowcolor{lightred} \texttt{postgres:9.6} & 6 & 48 & 17 & 47 & 121 \\ \bottomrule
+\rowcolor{lightgreen} \texttt{postgres:18} & 0 & 6 & 9 & 98 & 113 \\
+\rowcolor{lightgreen} \texttt{postgres:17} & 0 & 6 & 9 & 98 & 117 \\
+\rowcolor{lightgreen} \texttt{postgres:16} & 0 & 6 & 9 & 98 & 113 \\
+\rowcolor{lightgreen} \texttt{postgres:15} & 0 & 6 & 9 & 98 & 113 \\
+\rowcolor{lightgreen} \texttt{postgres:14} & 0 & 6 & 9 & 98 & 113 \\
+\rowcolor{lightred} \texttt{postgres:13} & 0 & 6 & 9 & 98 & 113 \\ \midrule
+\rowcolor{lightred} \texttt{postgres:12} & 9 & 70 & 100 & 124 & 305 \\
+\rowcolor{lightred} \texttt{postgres:11} & 7 & 84 & 52 & 49 & 192 \\
+\rowcolor{lightred} \texttt{postgres:10} & 7 & 84 & 52 & 49 & 192 \\
+\rowcolor{lightred} \texttt{postgres:9.6} & 10 & 97 & 57 & 49 & 213 \\ \bottomrule
 \end{tabular}
 \end{table}
 
-\begin{figure}[h!]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
@@ -156,10 +156,10 @@ Table \ref{tab:trivy} and Figure \ref{fig:vuln-chart} show the results.
     },
     legend style={at={(0.5,-0.2)}, anchor=north, legend columns=-1}
 ]
-\addplot[fill=vuln-low] coordinates {(97,18) (97,17) (97,16) (97,15) (97,14) (97,13) (129,12) (47,11) (47,10) (47,9.6)};
-\addplot[fill=vuln-medium] coordinates {(3,18) (3,17) (3,16) (3,15) (3,14) (3,13) (56,12) (12,11) (12,10) (17,9.6)};
-\addplot[fill=vuln-high] coordinates {(1,18) (1,17) (1,16) (1,15) (1,14) (1,13) (33,12) (35,11) (35,10) (48,9.6)};
-\addplot[fill=vuln-critical] coordinates {(0,18) (0,17) (0,16) (0,15) (0,14) (0,13) (5,12) (3,11) (3,10) (6,9.6)};
+\addplot[fill=vuln-low] coordinates {(98,18) (98,17) (98,16) (98,15) (98,14) (98,13) (124,12) (49,11) (49,10) (49,9.6)};
+\addplot[fill=vuln-medium] coordinates {(9,18) (9,17) (9,16) (9,15) (9,14) (9,13) (100,12) (52,11) (52,10) (57,9.6)};
+\addplot[fill=vuln-high] coordinates {(6,18) (6,17) (6,16) (6,15) (6,14) (6,13) (70,12) (84,11) (84,10) (97,9.6)};
+\addplot[fill=vuln-critical] coordinates {(0,18) (0,17) (0,16) (0,15) (0,14) (0,13) (9,12) (7,11) (7,10) (10,9.6)};
 \legend{Low, Medium, High, Critical}
 \end{axis}
 \end{tikzpicture}
@@ -174,7 +174,7 @@ The combined data analysis is clear. Figure \ref{fig:vuln-chart} strikingly illu
 
 \begin{itemize}
     \item \textbf{The danger of unsupported versions:} Versions that have reached their end of life (12, 11, 10, 9.6) accumulate a dangerous number of vulnerabilities, including several \textbf{critical} ones.
-    \item \textbf{The security of supported versions:} In contrast, images of maintained versions (13 to 18) show no critical vulnerabilities and a low, consistent risk profile. Note that PostgreSQL 13 will reach EOL soon (2025-11-13).
+    \item \textbf{The security of supported versions:} In contrast, images of maintained versions (14 to 18) show no critical vulnerabilities and a low, consistent risk profile. Note that PostgreSQL 13 is now unsupported.
     \item \textbf{Recommendation:} The choice of PostgreSQL version must be for an actively supported version. The security risk of using an obsolete version is real and high.\\
 \end{itemize}
 
