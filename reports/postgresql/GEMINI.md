@@ -64,6 +64,72 @@ The `rapport_postgresql_EN.tex` file was updated to reflect the latest data and 
     *   `geol-showcase` GitHub repository
     *   PostgreSQL latest releases news link
 
+### 4.1 Risk Scoring System ⚠️ CRITICAL FORMULAS
+
+**IMPORTANT**: The report includes a mathematical risk scoring framework with two key formulas that must be maintained:
+
+#### Risk Score Calculation Formula (Line ~287-291)
+
+The weighted risk score formula uses summation notation and must remain mathematically consistent:
+
+```latex
+\begin{equation}
+\boxed{
+\text{Risk Score} = \sum_{i} w_i \cdot n_i = 10 \cdot n_{\text{Critical}} + 5 \cdot n_{\text{High}} + 2 \cdot n_{\text{Medium}} + 1 \cdot n_{\text{Low}}
+}
+\end{equation}
+```
+
+**DO NOT change the weights** (10, 5, 2, 1) without recalculating all risk scores in:
+- Main vulnerability table (Line ~320)
+- Patch comparison table (Line ~590)
+- Before/After migration table (Line ~660)
+- Executive One-Pager (Line ~100-120)
+
+#### Risk Classification Piecewise Function (Line ~297-308)
+
+The risk classification uses severity-based override rules to prevent misclassification:
+
+```latex
+\begin{equation}
+\boxed{
+\text{Risk Level} = 
+\begin{cases}
+\textcolor{vuln-critical}{\textbf{High}} & \text{if } \text{Score} > 300 \text{ OR } n_{\text{Critical}} \geq 3 \\[0.3cm]
+\textcolor{vuln-medium}{\textbf{Medium}} & \text{if } 150 \leq \text{Score} \leq 300 \text{ OR } n_{\text{Critical}} \geq 1 \\[0.3cm]
+\textcolor{gantt-supported}{\textbf{Low}} & \text{if } \text{Score} < 150 \text{ AND } n_{\text{Critical}} = 0
+\end{cases}
+}
+\end{equation}
+```
+
+**Key Rule**: Critical CVEs override score-based thresholds:
+- Any version with **≥3 Critical CVEs** is automatically **High Risk**
+- Any version with **≥1 Critical CVE** is at least **Medium Risk**
+- Only versions with **0 Critical CVEs** can achieve **Low Risk**
+
+#### When Updating Vulnerability Data:
+
+1. **Scan all versions** with trivy and record: Critical, High, Medium, Low counts
+2. **Calculate risk scores** for each version using the formula
+3. **Apply classification rules** using the piecewise function
+4. **Update all tables** with new scores and classifications:
+   - Vulnerability Summary Table (with Risk Score column)
+   - Patch Comparison Table (with Risk Score column)
+   - Before/After Migration Table
+   - Risk Score Bar Chart (Line ~360-390)
+5. **Verify consistency** across Executive One-Pager, callout boxes, and text
+
+#### Example Calculation:
+
+PostgreSQL 12: 9 Critical, 70 High, 100 Medium, 124 Low
+- **Score** = (9×10) + (70×5) + (100×2) + (124×1) = 90 + 350 + 200 + 124 = **764**
+- **Classification** = High Risk (Score > 300 AND Critical ≥ 3)
+
+PostgreSQL 17: 0 Critical, 6 High, 9 Medium, 98 Low
+- **Score** = (0×10) + (6×5) + (9×2) + (98×1) = 0 + 30 + 18 + 98 = **146**
+- **Classification** = Low Risk (Score < 150 AND Critical = 0)
+
 ## 5. LaTeX Warning/Error Resolution
 
 *   **Float Specifier Warning**: Resolved `LaTeX Warning: !h' float specifier changed to !ht'` by changing all `[h!]` to `[htbp]` in `\begin{table}` and `\begin{figure}` environments, giving LaTeX more flexibility in placing floats.
