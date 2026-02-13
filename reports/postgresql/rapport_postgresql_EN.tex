@@ -311,13 +311,21 @@ To illustrate the concrete security risks of using unsupported versions, here ar
     (Critical,18)   [1]   (High,18)   [17]  (Medium,18)   [39]  (Low,18)   [102]
 };
 
-% Add value labels
-\node at (axis cs:Critical,9.6) {\tiny 10};
-\node at (axis cs:High,9.6) {\tiny 97};
-\node at (axis cs:Critical,12) {\tiny 9};
-\node at (axis cs:High,12) {\tiny 70};
-\node at (axis cs:Medium,12) {\tiny 100};
-\node at (axis cs:High,18) {\tiny 17};
+% Add value labels with white text for better visibility on dark backgrounds
+\node at (axis cs:Critical,9.6) [white] {\tiny\bf 10};
+\node at (axis cs:High,9.6) [white] {\tiny\bf 97};
+\node at (axis cs:High,10) [white] {\tiny\bf 84};
+\node at (axis cs:High,11) [white] {\tiny\bf 84};
+\node at (axis cs:Critical,12) [white] {\tiny\bf 9};
+\node at (axis cs:High,12) [white] {\tiny\bf 70};
+\node at (axis cs:Medium,12) [white] {\tiny\bf 100};
+\node at (axis cs:Low,12) [white] {\tiny\bf 124};
+\node at (axis cs:Low,13) [white] {\tiny\bf 98};
+\node at (axis cs:Low,14) [white] {\tiny\bf 98};
+\node at (axis cs:Low,15) [white] {\tiny\bf 98};
+\node at (axis cs:Low,16) [white] {\tiny\bf 98};
+\node at (axis cs:Low,17) [white] {\tiny\bf 98};
+\node at (axis cs:Low,18) [white] {\tiny\bf 102};
 
 \end{axis}
 \end{tikzpicture}
