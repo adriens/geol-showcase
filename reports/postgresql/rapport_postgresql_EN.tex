@@ -360,63 +360,6 @@ To illustrate the concrete security risks of using unsupported versions, here ar
 \end{itemize}
 
 
-\section{Migration Guide}
-
-\subsection{Recommended Upgrade Paths}
-
-PostgreSQL's 5-year support policy means careful planning is essential. Here are tested migration strategies:
-
-\textbf{For Production Systems on EOL Versions:}
-
-\begin{enumerate}
-    \item \textbf{Assess Current State}
-    \begin{itemize}
-        \item Run \texttt{pg\_dump} to ensure backup capability
-        \item Document custom configurations and extensions
-        \item Review application compatibility with target version
-    \end{itemize}
-    
-    \item \textbf{Choose Target Version}
-    \begin{itemize}
-        \item Minimum: PostgreSQL 14 (EOL 2026) - shortest migration path
-        \item Recommended: PostgreSQL 16 or 17 (EOL 2028-2029) - better long-term support
-        \item Latest: PostgreSQL 18 (EOL 2030) - maximum future-proofing
-    \end{itemize}
-    
-    \item \textbf{Migration Strategy}
-    \begin{verbatim}
-# Backup current database
-pg_dump -U postgres -Fc mydb > mydb.dump
-
-# Deploy new PostgreSQL version
-docker run -d --name postgres-new postgres:17
-
-# Restore data
-pg_restore -U postgres -d mydb mydb.dump
-    \end{verbatim}
-    
-    \item \textbf{Testing Checklist}
-    \begin{itemize}
-        \item Verify all queries execute correctly
-        \item Test application endpoints under load
-        \item Validate custom functions and stored procedures
-        \item Check extension compatibility (\texttt{pg\_upgrade --check})
-    \end{itemize}
-\end{enumerate}
-
-\textbf{Automation Best Practices:}
-
-Integrate version checking into CI/CD pipelines:
-\begin{verbatim}
-# Check PostgreSQL EOL status
-geol check psql --version 13
-# Exit code 1 if EOL, integrate into quality gates
-
-# Scan Docker images before deployment
-trivy image postgres:18 --severity CRITICAL,HIGH --exit-code 1
-\end{verbatim}
-
-
 \subsection{Vulnerability Comparison: 18.0 vs 18.1 vs 18.2}
 
 To illustrate the importance of patch releases, we compare the vulnerabilities found in \texttt{postgres:18} versions.
