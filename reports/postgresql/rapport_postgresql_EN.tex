@@ -250,23 +250,24 @@ To illustrate the concrete security risks of using unsupported versions, here ar
 
 % Unsupported versions (EOL periods)
 \addplot[gantt-eol, line width=6pt] coordinates {(2016,1) (2021.86,1)}; % 9.6: 2016-2021.86
-\addplot[gantt-eol, line width=6pt] coordinates {(2017,2) (2022.86,2)}; % 10: 2017-2022.86
-\addplot[gantt-eol, line width=6pt] coordinates {(2018,3) (2023.86,3)}; % 11: 2018-2023.86
-\addplot[gantt-eol, line width=6pt] coordinates {(2019,4) (2024.89,4)}; % 12: 2019-2024.89
-\addplot[gantt-eol, line width=6pt] coordinates {(2020,5) (2025.87,5)}; % 13: 2020-2025.87
+\addlegendentry{EOL/Unsupported}
+\addplot[gantt-eol, line width=6pt, forget plot] coordinates {(2017,2) (2022.86,2)}; % 10: 2017-2022.86
+\addplot[gantt-eol, line width=6pt, forget plot] coordinates {(2018,3) (2023.86,3)}; % 11: 2018-2023.86
+\addplot[gantt-eol, line width=6pt, forget plot] coordinates {(2019,4) (2024.89,4)}; % 12: 2019-2024.89
+\addplot[gantt-eol, line width=6pt, forget plot] coordinates {(2020,5) (2025.87,5)}; % 13: 2020-2025.87
 
 % Supported versions
 \addplot[gantt-supported, line width=6pt] coordinates {(2021,6) (2026.87,6)}; % 14: 2021-2026.87
-\addplot[gantt-supported, line width=6pt] coordinates {(2022,7) (2027.87,7)}; % 15: 2022-2027.87
-\addplot[gantt-supported, line width=6pt] coordinates {(2023,8) (2028.86,8)}; % 16: 2023-2028.86
-\addplot[gantt-supported, line width=6pt] coordinates {(2024,9) (2029.86,9)}; % 17: 2024-2029.86
-\addplot[gantt-supported, line width=6pt] coordinates {(2025,10) (2030.87,10)}; % 18: 2025-2030.87
+\addlegendentry{Supported}
+\addplot[gantt-supported, line width=6pt, forget plot] coordinates {(2022,7) (2027.87,7)}; % 15: 2022-2027.87
+\addplot[gantt-supported, line width=6pt, forget plot] coordinates {(2023,8) (2028.86,8)}; % 16: 2023-2028.86
+\addplot[gantt-supported, line width=6pt, forget plot] coordinates {(2024,9) (2029.86,9)}; % 17: 2024-2029.86
+\addplot[gantt-supported, line width=6pt, forget plot] coordinates {(2025,10) (2030.87,10)}; % 18: 2025-2030.87
 
 % Current date marker
-\addplot[black, dashed, line width=1pt] coordinates {(2026,0) (2026,10.5)};
+\addplot[black, dashed, line width=1pt, forget plot] coordinates {(2026,0) (2026,10.5)};
 \node at (axis cs:2026,10.5) [above] {\small Today};
 
-\legend{EOL/Unsupported, Supported}
 \end{axis}
 \end{tikzpicture}
 \caption{PostgreSQL version support periods showing 5-year lifecycle policy. Supported versions shown in green, EOL versions in red.}
