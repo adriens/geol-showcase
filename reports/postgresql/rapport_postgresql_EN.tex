@@ -10,6 +10,7 @@
 \usepackage{amssymb} % For checkmark and math symbols
 \usepackage[table]{xcolor} % Ajout pour la couleur des tableaux
 \usepackage{pgfplots} % Ajout pour les graphiques
+\usepackage{soul} % For text highlighting
 \pgfplotsset{compat=1.18} % Spécifier une version de compatibilité
 
 % Couleurs personnalisées (consistent severity palette)
@@ -22,6 +23,7 @@
 \definecolor{vuln-low}{rgb}{0.4,0.6,0.9}       % Light blue
 \definecolor{gantt-supported}{rgb}{0.2,0.7,0.3}
 \definecolor{gantt-eol}{rgb}{0.8,0.2,0.2}
+\definecolor{highlight}{rgb}{1,1,0.7}          % Light yellow for highlighting
 
 
 % Configuration des marges
@@ -30,7 +32,7 @@
 % Configuration des liens hypertextes
 \hypersetup{
     colorlinks=true,
-    linkcolor=black,
+    linkcolor=blue,
     urlcolor=blue,
     pdftitle={PostgreSQL Security Analysis},
     pdfauthor={Adrien SALES (@rastadidi)},
@@ -47,11 +49,14 @@
 
 \maketitle
 
+\tableofcontents
+\newpage
+
 \begin{abstract}
 This article presents a concise analysis of the security and lifecycle of
 the \href{https://www.postgresql.org/}{PostgreSQL} database versions.
 
-Using the \href{https://github.com/opt-nc/geol}{\texttt{geol}} tool to check End-of-Life dates and \texttt{trivy} to scan vulnerabilities in official Docker images, I establish a risk profile for currently supported and unsupported versions.\\
+Using the \href{https://github.com/opt-nc/geol}{\texttt{geol}} tool to check End-of-Life dates and \href{https://trivy.dev/}{\texttt{trivy}} to scan vulnerabilities in official Docker images, I establish a risk profile for currently supported and unsupported versions.\\
 
 The goal is to demonstrate the crucial importance of using maintained versions and the value of combining generative AI with optimally designed CLI tools to automate and enrich this type of analysis.
 \end{abstract}
@@ -61,17 +66,17 @@ The goal is to demonstrate the crucial importance of using maintained versions a
 \textbf{Key Findings:}
 
 \begin{itemize}
-    \item \textbf{5 Supported Versions:} PostgreSQL versions 14-18 are actively maintained with EOL dates ranging from 2026 to 2030.
-    \item \textbf{Fresh EOL Alert:} PostgreSQL 13 recently reached end-of-life on November 13, 2025, joining versions 9.6-12 as unsupported.
-    \item \textbf{Security Gap:} Unsupported versions contain \textbf{2-10× more vulnerabilities} than supported versions, with critical CVEs present only in EOL versions.
-    \item \textbf{Patch Impact:} Minor updates are crucial - PostgreSQL 18.1 reduced vulnerabilities by 22\% compared to 18.0 (204 → 159 total vulnerabilities).
-    \item \textbf{Critical Recommendation:} Migrate immediately from any version $\leq$13 to version $\geq$14. The security risk of unsupported versions is unacceptable for production environments.
+    \item \textbf{\textcolor{gantt-supported}{5 Supported Versions:}} PostgreSQL versions 14-18 are actively maintained with EOL dates ranging from 2026 to 2030.
+    \item \textbf{\textcolor{gantt-eol}{Fresh EOL Alert:}} PostgreSQL 13 recently reached end-of-life on November 13, 2025, joining versions 9.6-12 as unsupported.
+    \item \textbf{\textcolor{vuln-critical}{Security Gap:}} Unsupported versions contain \textbf{\textcolor{vuln-critical}{2-10× more vulnerabilities}} than supported versions, with critical CVEs present only in EOL versions.
+    \item \textbf{Patch Impact:} Minor updates are crucial - PostgreSQL 18.1 reduced vulnerabilities by \textbf{\textcolor{gantt-supported}{22\%}} compared to 18.0 (204 → 159 total vulnerabilities).
+    \item \textbf{\textcolor{vuln-critical}{Critical Recommendation:}} Migrate immediately from any version $\leq$13 to version $\geq$14. The security risk of unsupported versions is unacceptable for production environments.
 \end{itemize}
 
 \textbf{Risk Profile Summary:}
 \begin{itemize}
-    \item $\checkmark$ \textbf{Low Risk:} Versions 14-18 (0-1 critical, 6-17 high vulnerabilities)
-    \item $\times$ \textbf{High Risk:} Versions 9.6-13 (7-10 critical, 70-97 high vulnerabilities)
+    \item $\checkmark$ \textbf{\textcolor{gantt-supported}{Low Risk:}} Versions 14-18 (0-1 critical, 6-17 high vulnerabilities)
+    \item $\times$ \textbf{\textcolor{gantt-eol}{High Risk:}} Versions 9.6-13 (7-10 critical, 70-97 high vulnerabilities)
 \end{itemize}
 
 \section{Introduction to the Tools}
@@ -98,6 +103,18 @@ Below is a quick overview of the tools used for this analysis.
 \subsection{\LaTeX{}: Report Generator}
 
 \LaTeX{} is a document composition system that produces high-quality technical and scientific reports. We use \texttt{xelatex} for compilation. It is particularly suited for structuring, formatting, and presenting security analysis results clearly and professionally.
+
+\section{PostgreSQL Overview}
+
+PostgreSQL \href{https://www.postgresql.org/}{https://www.postgresql.org/}, also known as Postgres, is a free and open-source relational database management system (RDBMS) emphasizing extensibility and technical standards compliance.
+
+Postgres recommends that all users run the latest available minor release for whatever major version is in use.
+
+The PostgreSQL Global Development Group supports a major version for 5 years after its initial release. After its five-year anniversary, a major version will have one last minor release containing any fixes and will be considered end-of-life (EOL) and no longer supported.
+
+The Release roadmap \href{https://www.postgresql.org/developer/roadmap/}{https://www.postgresql.org/developer/roadmap/} lists upcoming minor and major releases. If the release team determines that a critical bug or security fix is too important to wait until the regularly scheduled minor release, it may make a release available outside the minor release roadmap.
+
+A Feature Matrix \href{https://www.postgresql.org/about/featurematrix/}{https://www.postgresql.org/about/featurematrix/} documents feature availability against major releases.
 
 \section{Methodology}
 
@@ -361,6 +378,7 @@ To illustrate the concrete security risks of using unsupported versions, here ar
 
 
 \subsection{Vulnerability Comparison: 18.0 vs 18.1 vs 18.2}
+\label{subsec:patch-comparison}
 
 To illustrate the importance of patch releases, we compare the vulnerabilities found in \texttt{postgres:18} versions.
 
@@ -381,7 +399,8 @@ To illustrate the importance of patch releases, we compare the vulnerabilities f
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-    ybar,
+    ybar=2pt,
+    bar width=7pt,
     width=\textwidth,
     height=8cm,
     title={Vulnerability Comparison: 18.0 vs 18.1 vs 18.2},
@@ -391,31 +410,54 @@ To illustrate the importance of patch releases, we compare the vulnerabilities f
     xtick=data,
     nodes near coords,
     nodes near coords align={vertical},
-    legend style={at={(0.5,-0.2)}, anchor=north, legend columns=-1}
+    legend style={at={(0.5,-0.2)}, anchor=north, legend columns=3},
+    enlarge x limits=0.25
 ]
-\addplot[fill=lightorange] coordinates {(Critical,4) (High,30) (Medium,68) (Low,102)};
-\addplot[fill=lightgreen] coordinates {(Critical,1) (High,17) (Medium,39) (Low,102)};
-\addplot[fill=lightgreen] coordinates {(Critical,1) (High,17) (Medium,39) (Low,102)};
+\addplot[fill=lightorange!80] coordinates {(Critical,4) (High,30) (Medium,68) (Low,102)};
+\addplot[fill=lightgreen!80] coordinates {(Critical,1) (High,17) (Medium,39) (Low,102)};
+\addplot[fill=lightgreen!60] coordinates {(Critical,1) (High,17) (Medium,39) (Low,102)};
 \legend{Postgres 18.0, Postgres 18.1, Postgres 18.2}
 \end{axis}
 \end{tikzpicture}
-\caption{Comparison of vulnerabilities detected by \texttt{trivy} for PostgreSQL 18.0, 18.1 and 18.2.}
+\caption{Comparison of vulnerabilities detected by \texttt{trivy} for PostgreSQL 18.0, 18.1 and 18.2. Grouped bars show clear reduction in critical and high severity issues.}
 \label{fig:vuln-chart-18.0-18.1}
 \end{figure}
 
 The updates from 18.0 to 18.1 and then to 18.2 significantly reduced the number of critical, high, and medium vulnerabilities, demonstrating the effectiveness of minor releases in addressing security issues. For detailed changes, refer to the respective changelogs: \href{https://www.postgresql.org/docs/18/release-18.html}{18.0}, \href{https://www.postgresql.org/docs/18/release-18-1.html}{18.1}, and \href{https://www.postgresql.org/docs/18/release-18-2.html}{18.2}.
 
-\section{PostgreSQL Overview}
+\section{Recommendations}
 
-PostgreSQL \href{https://www.postgresql.org/}{https://www.postgresql.org/}, also known as Postgres, is a free and open-source relational database management system (RDBMS) emphasizing extensibility and technical standards compliance.
+Based on the comprehensive security analysis presented in this report, the following actions are recommended:
 
-Postgres recommends that all users run the latest available minor release for whatever major version is in use.
+\subsection{Immediate Actions (Critical Priority)}
 
-The PostgreSQL Global Development Group supports a major version for 5 years after its initial release. After its five-year anniversary, a major version will have one last minor release containing any fixes and will be considered end-of-life (EOL) and no longer supported.
+\begin{itemize}
+    \item \textbf{Migrate from EOL Versions:} If currently running PostgreSQL versions $\leq$13, plan immediate migration to version $\geq$14. These versions contain 2-10× more vulnerabilities.
+    \item \textbf{Audit Current Deployments:} Use \texttt{geol check psql --version X} to verify your PostgreSQL version status in CI/CD pipelines.
+    \item \textbf{Scan Docker Images:} Integrate \texttt{trivy image postgres:X --severity CRITICAL,HIGH} into deployment workflows.
+\end{itemize}
 
-The Release roadmap \href{https://www.postgresql.org/developer/roadmap/}{https://www.postgresql.org/developer/roadmap/} lists upcoming minor and major releases. If the release team determines that a critical bug or security fix is too important to wait until the regularly scheduled minor release, it may make a release available outside the minor release roadmap.
+\subsection{Long-Term Strategy}
 
-A Feature Matrix \href{https://www.postgresql.org/about/featurematrix/}{https://www.postgresql.org/about/featurematrix/} documents feature availability against major releases.
+\begin{itemize}
+    \item \textbf{Target Version Selection:}
+    \begin{itemize}
+        \item Minimum: PostgreSQL 14 (EOL Nov 2026) - escape EOL status
+        \item Recommended: PostgreSQL 16-17 (EOL 2028-2029) - optimal support window
+        \item Latest: PostgreSQL 18 (EOL Nov 2030) - maximum future-proofing
+    \end{itemize}
+    \item \textbf{Patch Management:} Establish automated monitoring for minor releases - as shown in Section \ref{subsec:patch-comparison}, patches can reduce vulnerabilities by 22\% or more.
+    \item \textbf{Docker Tag Strategy:} Use specific version tags (e.g., \texttt{postgres:17.7}) instead of major version tags to control updates.
+\end{itemize}
+
+\subsection{DevSecOps Integration}
+
+\begin{itemize}
+    \item Implement automated EOL checking in quality gates
+    \item Set up vulnerability scanning as a deployment prerequisite
+    \item Schedule quarterly reviews of PostgreSQL version lifecycle status
+    \item Document upgrade paths and maintain rollback procedures
+\end{itemize}
 
 \section{Summary and conclusion}
 
