@@ -110,7 +110,7 @@ An unsupported version is a \textbf{gateway to unpatched vulnerabilities.}
 \begin{tabular}{@{}lccccc@{}}
 	
 	\textbf{Version} & \textbf{Release Date} & \textbf{Latest} & \textbf{Latest Release} & \textbf{End of Support (EOL)} & \textbf{Status} \\ \midrule
-\rowcolor{lightgreen} 18 & 2025-09-25 & 18.1 & 2025-11-10 & 2030-11-14 & Supported \\
+\rowcolor{lightgreen} 18 & 2025-09-25 & 18.2 & 2026-02-09 & 2030-11-14 & Supported \\
 \rowcolor{lightgreen} 17 & 2024-09-26 & 17.7 & 2025-11-10 & 2029-11-08 & Supported \\
 \rowcolor{lightgreen} 16 & 2023-09-14 & 16.11 & 2025-11-10 & 2028-11-09 & Supported \\
 \rowcolor{lightgreen} 15 & 2022-10-13 & 15.15 & 2025-11-10 & 2027-11-11 & Supported \\
@@ -136,7 +136,7 @@ Table \ref{tab:trivy} and Figure \ref{fig:vuln-chart} show the results.
 \label{tab:trivy}
 \begin{tabular}{@{}lccccc@{}}
 	\textbf{Docker Tag} & \textbf{Critical} & \textbf{High} & \textbf{Medium} & \textbf{Low} & \textbf{Total} \\ \midrule
-\rowcolor{lightgreen} \texttt{postgres:18} & 0 & 6 & 9 & 98 & 113 \\
+\rowcolor{lightgreen} \texttt{postgres:18.2} & 1 & 17 & 39 & 102 & 159 \\
 \rowcolor{lightgreen} \texttt{postgres:17} & 0 & 6 & 9 & 98 & 117 \\
 \rowcolor{lightgreen} \texttt{postgres:16} & 0 & 6 & 9 & 98 & 113 \\
 \rowcolor{lightgreen} \texttt{postgres:15} & 0 & 6 & 9 & 98 & 113 \\
@@ -158,7 +158,7 @@ Table \ref{tab:trivy} and Figure \ref{fig:vuln-chart} show the results.
     height=8cm,
     title={Vulnerability Distribution by PostgreSQL Version},
     xlabel={Number of Vulnerabilities},
-    symbolic y coords={9.6.24, 10.23, 11.22, 12.22, 13.23, 14.20, 15.15, 16.11, 17.7, 18.1},
+    symbolic y coords={9.6.24, 10.23, 11.22, 12.22, 13.23, 14.20, 15.15, 16.11, 17.7, 18.2},
     ytick=data,
     nodes near coords,
     nodes near coords align={horizontal},
@@ -171,10 +171,10 @@ Table \ref{tab:trivy} and Figure \ref{fig:vuln-chart} show the results.
     },
     legend style={at={(0.5,-0.2)}, anchor=north, legend columns=-1}
 ]
-\addplot[fill=vuln-low] coordinates {(98,18.1) (98,17.7) (98,16.11) (98,15.15) (98,14.20) (98,13.23) (124,12.22) (49,11.22) (49,10.23) (49,9.6.24)};
-\addplot[fill=vuln-medium] coordinates {(9,18.1) (9,17.7) (9,16.11) (9,15.15) (9,14.20) (9,13.23) (100,12.22) (52,11.22) (52,10.23) (57,9.6.24)};
-\addplot[fill=vuln-high] coordinates {(6,18.1) (6,17.7) (6,16.11) (6,15.15) (6,14.20) (6,13.23) (70,12.22) (84,11.22) (84,10.23) (97,9.6.24)};
-\addplot[fill=vuln-critical] coordinates {(0,18.1) (0,17.7) (0,16.11) (0,15.15) (0,14.20) (0,13.23) (9,12.22) (7,11.22) (7,10.23) (10,9.6.24)};
+\addplot[fill=vuln-low] coordinates {(102,18.2) (98,17.7) (98,16.11) (98,15.15) (98,14.20) (98,13.23) (124,12.22) (49,11.22) (49,10.23) (49,9.6.24)};
+\addplot[fill=vuln-medium] coordinates {(39,18.2) (9,17.7) (9,16.11) (9,15.15) (9,14.20) (9,13.23) (100,12.22) (52,11.22) (52,10.23) (57,9.6.24)};
+\addplot[fill=vuln-high] coordinates {(17,18.2) (6,17.7) (6,16.11) (6,15.15) (6,14.20) (6,13.23) (70,12.22) (84,11.22) (84,10.23) (97,9.6.24)};
+\addplot[fill=vuln-critical] coordinates {(1,18.2) (0,17.7) (0,16.11) (0,15.15) (0,14.20) (0,13.23) (9,12.22) (7,11.22) (7,10.23) (10,9.6.24)};
 \legend{Low, Medium, High, Critical}
 \end{axis}
 \end{tikzpicture}
@@ -182,6 +182,51 @@ Table \ref{tab:trivy} and Figure \ref{fig:vuln-chart} show the results.
 \label{fig:vuln-chart}
 \end{figure}
 
+
+\subsection{Vulnerability Comparison: 18.0 vs 18.1 vs 18.2}
+
+To illustrate the importance of patch releases, we compare the vulnerabilities found in \texttt{postgres:18} versions.
+
+\begin{table}[htbp]
+\centering
+\caption{Vulnerability Comparison: PostgreSQL 18.0 vs 18.1 vs 18.2}
+\label{tab:trivy-compare}
+\begin{tabular}{@{}lccccc@{}}
+	\textbf{Docker Tag} & \textbf{Critical} & \textbf{High} & \textbf{Medium} & \textbf{Low} & \textbf{Total} \\ \midrule
+\rowcolor{lightorange} \texttt{postgres:18.0} & 4 & 30 & 68 & 102 & 204 \\
+\rowcolor{lightgreen} \texttt{postgres:18.1} & 1 & 17 & 39 & 102 & 159 \\
+\rowcolor{lightgreen} \texttt{postgres:18.2} & 1 & 17 & 39 & 102 & 159 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    ybar,
+    width=\textwidth,
+    height=8cm,
+    title={Vulnerability Comparison: 18.0 vs 18.1 vs 18.2},
+    xlabel={Severity},
+    ylabel={Number of Vulnerabilities},
+    symbolic x coords={Critical, High, Medium, Low},
+    xtick=data,
+    nodes near coords,
+    nodes near coords align={vertical},
+    legend style={at={(0.5,-0.2)}, anchor=north, legend columns=-1}
+]
+\addplot[fill=lightorange] coordinates {(Critical,4) (High,30) (Medium,68) (Low,102)};
+\addplot[fill=lightgreen] coordinates {(Critical,1) (High,17) (Medium,39) (Low,102)};
+\addplot[fill=lightgreen] coordinates {(Critical,1) (High,17) (Medium,39) (Low,102)};
+\legend{Postgres 18.0, Postgres 18.1, Postgres 18.2}
+\end{axis}
+\end{tikzpicture}
+\caption{Comparison of vulnerabilities detected by \texttt{trivy} for PostgreSQL 18.0, 18.1 and 18.2.}
+\label{fig:vuln-chart-18.0-18.1}
+\end{figure}
+
+The updates from 18.0 to 18.1 and then to 18.2 significantly reduced the number of critical, high, and medium vulnerabilities, demonstrating the effectiveness of minor releases in addressing security issues. For detailed changes, refer to the respective changelogs: \href{https://www.postgresql.org/docs/18/release-18.html}{18.0}, \href{https://www.postgresql.org/docs/18/release-18-1.html}{18.1}, and \href{https://www.postgresql.org/docs/18/release-18-2.html}{18.2}.
 
 \section{PostgreSQL Overview}
 
