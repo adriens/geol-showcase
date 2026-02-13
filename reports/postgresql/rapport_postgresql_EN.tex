@@ -466,7 +466,7 @@ Based on the comprehensive security analysis presented in this report, the follo
 
 \begin{itemize}
     \item \textbf{Migrate from EOL Versions:} If currently running PostgreSQL versions $\leq$13, plan immediate migration to version $\geq$14. These versions contain 2-10× more vulnerabilities.
-    \item \textbf{Audit Current Deployments:} Use \texttt{geol check psql --version X} to verify your PostgreSQL version status in CI/CD pipelines.
+    \item \textbf{Audit Current Deployments:} Use \texttt{geol check} command to continuously monitor PostgreSQL lifecycle status. Run \texttt{geol help check} for more information.
     \item \textbf{Scan Docker Images:} Integrate \texttt{trivy image postgres:X --severity CRITICAL,HIGH} into deployment workflows.
 \end{itemize}
 
