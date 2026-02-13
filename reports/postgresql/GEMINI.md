@@ -2,14 +2,34 @@
 
 This document outlines the steps taken by the Gemini CLI agent to update the PostgreSQL security analysis report (`rapport_postgresql_EN.tex`). This process can be replicated for future updates to new PostgreSQL versions.
 
-## 1. Tool Identification and Versioning
+## 1. Tool Identification and Versioning ⚠️ CRITICAL STEP
 
-The following tools were identified and their versions retrieved *from the current shell environment* for inclusion in the report:
+**IMPORTANT**: Always verify and update tool versions at the start of any report update. Tool versions **MUST** be retrieved from the current shell environment, not hardcoded or assumed.
 
-*   **`geol`**: `geol version` (e.g., `2.7.1`)
-*   **`trivy`**: `trivy --version` (e.g., `0.69.1`, including Vulnerability DB version `2`)
-*   **`gemini-cli`**: `gemini --version` (e.g., `0.28.2`)
-*   **`xelatex`**: `xelatex --version` (e.g., `XeTeX 3.141592653-2.6-0.999995 (TeX Live 2023/Debian)`)
+### Commands to Run (DO NOT SKIP):
+
+1. **`geol`**: Run `geol version` to get the current version
+   - Example output: `2.7.1`
+   - Update in LaTeX: Line ~90 in `\subsection{\texttt{geol}: The Lifecycle Guardian}`
+
+2. **`trivy`**: Run `trivy --version` to get the current version
+   - Example output: `Version: 0.69.1` (also note Vulnerability DB version)
+   - Update in LaTeX: Line ~93 in `\subsection{\texttt{trivy}: The Vulnerability Scanner}`
+
+3. **`gemini-cli`**: Run `gemini --version` to get the current version
+   - Example output: `0.28.2`
+   - Update in LaTeX: Line ~96 in `\subsection{\texttt{gemini-cli}: AI Assistant}`
+
+4. **`xelatex`**: Run `xelatex --version` to get the current version
+   - Example output: `XeTeX 3.141592653-2.6-0.999995 (TeX Live 2023/Debian)`
+   - Update in LaTeX: Line ~100 in `\subsection{\LaTeX{}: Report Generator}` (if mentioned)
+
+### Verification Checklist:
+
+- [ ] Run all four version commands
+- [ ] Update LaTeX document with actual versions
+- [ ] Build PDF to verify changes compile
+- [ ] Verify versions appear correctly in the generated PDF
 
 ## 2. PostgreSQL Lifecycle Data Retrieval (`geol`)
 
