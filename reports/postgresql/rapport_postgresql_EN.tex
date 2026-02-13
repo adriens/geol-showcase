@@ -7,6 +7,7 @@
 \usepackage{hyperref}
 \usepackage{lmodern}
 \usepackage{graphicx}
+\usepackage{amsmath} % For math equations and \text command
 \usepackage{amssymb} % For checkmark and math symbols
 \usepackage[table]{xcolor} % Ajout pour la couleur des tableaux
 \usepackage{pgfplots} % Ajout pour les graphiques
@@ -102,7 +103,9 @@ The goal is to demonstrate the crucial importance of using maintained versions a
 \Huge\textbf{5}\\
 \normalsize Versions 14-18\\[0.3cm]
 \large\textbf{0-1} Critical CVEs\\
-\large\textbf{6-17} High CVEs
+\large\textbf{6-17} High CVEs\\[0.2cm]
+\small Risk Score: \textbf{146-275}\\
+\textcolor{gantt-supported}{\textbf{LOW RISK}}
 \end{tcolorbox}
 \end{minipage}
 &
@@ -112,7 +115,9 @@ The goal is to demonstrate the crucial importance of using maintained versions a
 \Huge\textbf{5}\\
 \normalsize Versions 9.6-13\\[0.3cm]
 \large\textbf{7-10} Critical CVEs\\
-\large\textbf{70-97} High CVEs
+\large\textbf{70-97} High CVEs\\[0.2cm]
+\small Risk Score: \textbf{643-764}\\
+\textcolor{vuln-critical}{\textbf{HIGH RISK}}
 \end{tcolorbox}
 \end{minipage}
 \end{tabular}
@@ -123,14 +128,14 @@ The goal is to demonstrate the crucial importance of using maintained versions a
 \subsection*{Critical Decision Matrix}
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|l|c|}
 \hline
 \rowcolor{lightgray}
-\textbf{If Your Version Is...} & \textbf{Action Required} \\ \hline
-\rowcolor{lightred} ≤ 13 (EOL) & \textbf{URGENT}: Migrate immediately (2-10× more vulnerabilities) \\ \hline
-\rowcolor{lightorange} 14 & Plan upgrade to 16/17 (EOL approaching 2026) \\ \hline
-\rowcolor{lightgreen} 15-17 & Monitor for patches, review annually \\ \hline
-\rowcolor{lightgreen} 18 (Latest) & Excellent - maintain patch currency \\ \hline
+\textbf{If Your Version Is...} & \textbf{Action Required} & \textbf{Risk Score} \\ \hline
+\rowcolor{lightred} ≤ 13 (EOL) & \textbf{URGENT}: Migrate immediately (2-10× more vulnerabilities) & 643-764 \\ \hline
+\rowcolor{lightorange} 14 & Plan upgrade to 16/17 (EOL approaching 2026) & 146 \\ \hline
+\rowcolor{lightgreen} 15-17 & Monitor for patches, review annually & 146 \\ \hline
+\rowcolor{lightgreen} 18 (Latest) & Excellent - maintain patch currency & 275 \\ \hline
 \end{tabular}
 \end{center}
 
@@ -141,7 +146,8 @@ The goal is to demonstrate the crucial importance of using maintained versions a
 \begin{multicols}{2}
 \begin{itemize}
     \item \textbf{Vulnerability Reduction}: Upgrading from v12 to v17 eliminates \textbf{9 critical CVEs} and reduces total vulnerabilities by \textbf{63\%}
-    \item \textbf{Patch Effectiveness}: v18.1 fixed \textbf{22\%} of vulnerabilities compared to v18.0
+    \item \textbf{Risk Score Improvement}: v12→v17 reduces risk score from \textbf{764 to 146} (81\% reduction)
+    \item \textbf{Patch Effectiveness}: v18.0→v18.1 reduced risk score by \textbf{36\%} (428→275)
     \item \textbf{Support Window}: 5-year lifecycle per major version
     \item \textbf{Latest Supported}: Version 18 (EOL: Nov 2030)
     \item \textbf{Next EOL Event}: Version 14 (Nov 2026)
@@ -274,28 +280,43 @@ An unsupported version is a \textbf{gateway to unpatched vulnerabilities.}
 
 The second step is to analyze the "attack surface" of Docker images. It's important to note that while we use major version Docker tags (e.g., \texttt{postgres:18}), these tags typically point to the latest patch release within that major version series (e.g., \texttt{postgres:18} currently refers to \texttt{postgres:18.1}).
 
+\subsubsection{Risk Scoring Methodology}
+
+To quantify the security risk of each PostgreSQL version, we apply a weighted risk scoring formula that prioritizes critical and high-severity vulnerabilities:
+
+\begin{equation}
+\text{Risk Score} = (\text{Critical} \times 10) + (\text{High} \times 5) + (\text{Medium} \times 2) + (\text{Low} \times 1)
+\end{equation}
+
+Risk levels are classified as:
+\begin{itemize}
+    \item \textcolor{gantt-supported}{\textbf{Low Risk ($<$150):}} Acceptable for production use
+    \item \textcolor{vuln-medium}{\textbf{Medium Risk (150-300):}} Requires monitoring and upgrade planning
+    \item \textcolor{vuln-critical}{\textbf{High Risk ($>$300):}} Critical - immediate action required
+\end{itemize}
+
 Table \ref{tab:trivy} and Figure \ref{fig:vuln-chart} show the results.
 
 \begin{tcolorbox}[colback=lightred!30, colframe=vuln-critical, title=⚠️ Critical Finding: EOL Version Vulnerability Gap, fonttitle=\bfseries]
-\textbf{Unsupported versions (9.6-13) contain 2-10× more vulnerabilities than supported versions (14-18).} PostgreSQL 12 alone has \textbf{305 total vulnerabilities} including \textbf{9 critical CVEs}, compared to just \textbf{113 total} and \textbf{0 critical} in version 17.
+\textbf{Unsupported versions (9.6-13) contain 2-10× more vulnerabilities than supported versions (14-18).} PostgreSQL 12 alone has a \textbf{risk score of 764} (High Risk) with \textbf{9 critical CVEs}, compared to a score of \textbf{146} (Low Risk) and \textbf{0 critical} in version 17.
 \end{tcolorbox}
 
 \begin{table}[htbp]
 \centering
-\caption{Vulnerability Summary by Version}
+\caption{Vulnerability Summary by Version with Risk Scores}
 \label{tab:trivy}
-\begin{tabular}{@{}lccccc@{}}
-	\textbf{Docker Tag} & \textbf{Critical} & \textbf{High} & \textbf{Medium} & \textbf{Low} & \textbf{Total} \\ \midrule
-\rowcolor{lightgreen} \texttt{postgres:18.2} & 1 & 17 & 39 & 102 & 159 \\
-\rowcolor{lightgreen} \texttt{postgres:17} & 0 & 6 & 9 & 98 & 117 \\
-\rowcolor{lightgreen} \texttt{postgres:16} & 0 & 6 & 9 & 98 & 113 \\
-\rowcolor{lightgreen} \texttt{postgres:15} & 0 & 6 & 9 & 98 & 113 \\
-\rowcolor{lightgreen} \texttt{postgres:14} & 0 & 6 & 9 & 98 & 113 \\
-\rowcolor{lightred} \texttt{postgres:13} & 0 & 6 & 9 & 98 & 113 \\ \midrule
-\rowcolor{lightred} \texttt{postgres:12} & 9 & 70 & 100 & 124 & 305 \\
-\rowcolor{lightred} \texttt{postgres:11} & 7 & 84 & 52 & 49 & 192 \\
-\rowcolor{lightred} \texttt{postgres:10} & 7 & 84 & 52 & 49 & 192 \\
-\rowcolor{lightred} \texttt{postgres:9.6} & 10 & 97 & 57 & 49 & 213 \\ \bottomrule
+\begin{tabular}{@{}lcccccc@{}}
+	\textbf{Docker Tag} & \textbf{Critical} & \textbf{High} & \textbf{Medium} & \textbf{Low} & \textbf{Total} & \textbf{Risk Score} \\ \midrule
+\rowcolor{lightorange} \texttt{postgres:18.2} & 1 & 17 & 39 & 102 & 159 & \textbf{275} \\
+\rowcolor{lightgreen} \texttt{postgres:17} & 0 & 6 & 9 & 98 & 117 & \textbf{146} \\
+\rowcolor{lightgreen} \texttt{postgres:16} & 0 & 6 & 9 & 98 & 113 & \textbf{146} \\
+\rowcolor{lightgreen} \texttt{postgres:15} & 0 & 6 & 9 & 98 & 113 & \textbf{146} \\
+\rowcolor{lightgreen} \texttt{postgres:14} & 0 & 6 & 9 & 98 & 113 & \textbf{146} \\
+\rowcolor{lightgreen} \texttt{postgres:13} & 0 & 6 & 9 & 98 & 113 & \textbf{146} \\ \midrule
+\rowcolor{lightred} \texttt{postgres:12} & 9 & 70 & 100 & 124 & 305 & \textbf{764} \\
+\rowcolor{lightred} \texttt{postgres:11} & 7 & 84 & 52 & 49 & 192 & \textbf{643} \\
+\rowcolor{lightred} \texttt{postgres:10} & 7 & 84 & 52 & 49 & 192 & \textbf{643} \\
+\rowcolor{lightred} \texttt{postgres:9.6} & 10 & 97 & 57 & 49 & 213 & \textbf{748} \\ \bottomrule
 \end{tabular}
 \end{table}
 
@@ -330,6 +351,41 @@ Table \ref{tab:trivy} and Figure \ref{fig:vuln-chart} show the results.
 \end{tikzpicture}
 \caption{Comparison of vulnerabilities detected by \texttt{trivy}.}
 \label{fig:vuln-chart}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    ybar,
+    width=\textwidth,
+    height=8cm,
+    title={Risk Score by PostgreSQL Version},
+    xlabel={PostgreSQL Version},
+    ylabel={Risk Score},
+    symbolic x coords={18.2, 17.7, 16.11, 15.15, 14.20, 13.23, 12.22, 11.22, 10.23, 9.6.24},
+    xtick=data,
+    x tick label style={rotate=45, anchor=east},
+    nodes near coords,
+    nodes near coords align={vertical},
+    legend style={at={(0.5,-0.35)}, anchor=north, legend columns=3},
+    ymin=0,
+    ymax=850,
+    enlarge x limits=0.1,
+    bar width=12pt
+]
+\addplot[fill=lightorange, draw=vuln-medium] coordinates {(18.2,275) (17.7,146) (16.11,146) (15.15,146) (14.20,146) (13.23,146)};
+\addplot[fill=lightred, draw=vuln-critical] coordinates {(12.22,764) (11.22,643) (10.23,643) (9.6.24,748)};
+
+% Add risk level threshold lines
+\addplot[color=gantt-supported, line width=1.5pt, dashed, forget plot] coordinates {(18.2,150) (9.6.24,150)};
+\addplot[color=vuln-high, line width=1.5pt, dashed, forget plot] coordinates {(18.2,300) (9.6.24,300)};
+
+\legend{Supported Versions, EOL Versions}
+\end{axis}
+\end{tikzpicture}
+\caption{Risk scores showing dramatic security difference between supported (14-18) and EOL versions (9.6-13). Dashed lines indicate risk thresholds: Low Risk (below 150, green), Medium Risk (150-300, orange), High Risk (above 300, red).}
+\label{fig:risk-score}
 \end{figure}
 
 
@@ -529,13 +585,13 @@ To illustrate the importance of patch releases, we compare the vulnerabilities f
 
 \begin{table}[htbp]
 \centering
-\caption{Vulnerability Comparison: PostgreSQL 18.0 vs 18.1 vs 18.2}
+\caption{Vulnerability Comparison: PostgreSQL 18.0 vs 18.1 vs 18.2 with Risk Scores}
 \label{tab:trivy-compare}
-\begin{tabular}{@{}lccccc@{}}
-	\textbf{Docker Tag} & \textbf{Critical} & \textbf{High} & \textbf{Medium} & \textbf{Low} & \textbf{Total} \\ \midrule
-\rowcolor{lightorange} \texttt{postgres:18.0} & 4 & 30 & 68 & 102 & 204 \\
-\rowcolor{lightgreen} \texttt{postgres:18.1} & 1 & 17 & 39 & 102 & 159 \\
-\rowcolor{lightgreen} \texttt{postgres:18.2} & 1 & 17 & 39 & 102 & 159 \\
+\begin{tabular}{@{}lcccccc@{}}
+	\textbf{Docker Tag} & \textbf{Critical} & \textbf{High} & \textbf{Medium} & \textbf{Low} & \textbf{Total} & \textbf{Risk Score} \\ \midrule
+\rowcolor{lightorange} \texttt{postgres:18.0} & 4 & 30 & 68 & 102 & 204 & \textbf{428} \\
+\rowcolor{lightorange} \texttt{postgres:18.1} & 1 & 17 & 39 & 102 & 159 & \textbf{275} \\
+\rowcolor{lightorange} \texttt{postgres:18.2} & 1 & 17 & 39 & 102 & 159 & \textbf{275} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -546,6 +602,7 @@ The upgrade from 18.0 to 18.1 delivered immediate security improvements:
     \item \textbf{75\% reduction} in critical CVEs (4 → 1)
     \item \textbf{43\% reduction} in high-severity issues (30 → 17)
     \item \textbf{22\% overall reduction} in total vulnerabilities (204 → 159)
+    \item \textbf{36\% reduction} in risk score (428 → 275) - from High to Medium risk
 \end{itemize}
 \textbf{Recommendation:} Always deploy the latest patch within your chosen major version.
 \end{tcolorbox}
@@ -602,14 +659,16 @@ To illustrate the concrete security benefits of upgrading, here's a comparison o
 \rowcolor{lightgreen} Low CVEs & 124 & 98 \\
 \midrule
 \textbf{Total Vulnerabilities} & \textbf{305} & \textbf{113} \\
-\rowcolor{lightgreen} \textbf{Risk Reduction} & - & \textbf{63\%} \\
+\rowcolor{lightorange} \textbf{Risk Score} & \textbf{764 (High)} & \textbf{146 (Low)} \\
+\rowcolor{lightgreen} \textbf{Vulnerability Reduction} & - & \textbf{63\%} \\
+\rowcolor{lightgreen} \textbf{Risk Score Reduction} & - & \textbf{81\%} \\
 \rowcolor{lightgreen} Support Status & \textbf{EOL'd (Nov 2024)} & \textbf{Supported until Nov 2029} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{tcolorbox}[colback=lightgreen!20, colframe=gantt-supported, title=💡 Business Case for Migration, fonttitle=\bfseries]
-Upgrading from PostgreSQL 12 to 17 eliminates \textbf{all 9 critical vulnerabilities}, reduces high-severity issues by \textbf{91\%}, and provides \textbf{5 years of continued support}. The security ROI is immediate and substantial.
+Upgrading from PostgreSQL 12 to 17 eliminates \textbf{all 9 critical vulnerabilities}, reduces the risk score from \textbf{764 (High Risk) to 146 (Low Risk)} - an \textbf{81\% reduction}, and provides \textbf{5 years of continued support}. The security ROI is immediate and substantial.
 \end{tcolorbox}
 
 \subsection{Immediate Actions (Critical Priority)}
