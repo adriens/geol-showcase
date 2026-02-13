@@ -298,13 +298,16 @@ To quantify the security risk of each PostgreSQL version, we apply a weighted ri
 
 To prevent misclassification of versions with few but critical vulnerabilities, we apply severity-based override rules:
 
-\begin{tcolorbox}[colback=lightgray!20, colframe=black!50, title=Risk Level Determination Logic, fonttitle=\bfseries]
-\begin{enumerate}
-    \item \textcolor{vuln-critical}{\textbf{High Risk:}} Score $>$ 300 \textbf{OR} $n_{\text{Critical}} \geq 3$
-    \item \textcolor{vuln-medium}{\textbf{Medium Risk:}} Score $\in$ [150, 300] \textbf{OR} $n_{\text{Critical}} \geq 1$
-    \item \textcolor{gantt-supported}{\textbf{Low Risk:}} Score $<$ 150 \textbf{AND} $n_{\text{Critical}} = 0$
-\end{enumerate}
-\end{tcolorbox}
+\begin{equation}
+\boxed{
+\text{Risk Level} = 
+\begin{cases}
+\textcolor{vuln-critical}{\textbf{High}} & \text{if } \text{Score} > 300 \text{ OR } n_{\text{Critical}} \geq 3 \\[0.3cm]
+\textcolor{vuln-medium}{\textbf{Medium}} & \text{if } 150 \leq \text{Score} \leq 300 \text{ OR } n_{\text{Critical}} \geq 1 \\[0.3cm]
+\textcolor{gantt-supported}{\textbf{Low}} & \text{if } \text{Score} < 150 \text{ AND } n_{\text{Critical}} = 0
+\end{cases}
+}
+\end{equation}
 
 \vspace{0.2cm}
 
