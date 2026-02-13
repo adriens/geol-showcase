@@ -12,6 +12,8 @@
 \usepackage{pgfplots} % Ajout pour les graphiques
 \usepackage{soul} % For text highlighting
 \usepackage{fancyhdr} % For custom headers and footers
+\usepackage{tcolorbox} % For callout boxes
+\usepackage{multicol} % For two-column layout
 \pgfplotsset{compat=1.18} % Spécifier une version de compatibilité
 
 % Couleurs personnalisées (consistent severity palette)
@@ -77,6 +79,94 @@ The goal is to demonstrate the crucial importance of using maintained versions a
 \end{abstract}
 
 \tableofcontents
+\newpage
+
+% ============================================
+% EXECUTIVE ONE-PAGER
+% ============================================
+\section*{Executive One-Pager}
+\addcontentsline{toc}{section}{Executive One-Pager}
+
+\begin{center}
+\Large\textbf{PostgreSQL Security Status At-a-Glance}\\
+\normalsize Data as of \today
+\end{center}
+
+\vspace{0.5cm}
+
+\begin{center}
+\begin{tabular}{cc}
+\begin{minipage}{0.45\textwidth}
+\begin{tcolorbox}[colback=lightgreen, colframe=gantt-supported, title=\textbf{✓ Supported Versions}, fonttitle=\bfseries]
+\centering
+\Huge\textbf{5}\\
+\normalsize Versions 14-18\\[0.3cm]
+\large\textbf{0-1} Critical CVEs\\
+\large\textbf{6-17} High CVEs
+\end{tcolorbox}
+\end{minipage}
+&
+\begin{minipage}{0.45\textwidth}
+\begin{tcolorbox}[colback=lightred, colframe=gantt-eol, title=\textbf{✗ End-of-Life Versions}, fonttitle=\bfseries]
+\centering
+\Huge\textbf{5}\\
+\normalsize Versions 9.6-13\\[0.3cm]
+\large\textbf{7-10} Critical CVEs\\
+\large\textbf{70-97} High CVEs
+\end{tcolorbox}
+\end{minipage}
+\end{tabular}
+\end{center}
+
+\vspace{0.5cm}
+
+\subsection*{Critical Decision Matrix}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\rowcolor{lightgray}
+\textbf{If Your Version Is...} & \textbf{Action Required} \\ \hline
+\rowcolor{lightred} ≤ 13 (EOL) & \textbf{URGENT}: Migrate immediately (2-10× more vulnerabilities) \\ \hline
+\rowcolor{lightorange} 14 & Plan upgrade to 16/17 (EOL approaching 2026) \\ \hline
+\rowcolor{lightgreen} 15-17 & Monitor for patches, review annually \\ \hline
+\rowcolor{lightgreen} 18 (Latest) & Excellent - maintain patch currency \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.5cm}
+
+\subsection*{Key Metrics Summary}
+
+\begin{multicols}{2}
+\begin{itemize}
+    \item \textbf{Vulnerability Reduction}: Upgrading from v12 to v17 eliminates \textbf{9 critical CVEs} and reduces total vulnerabilities by \textbf{63\%}
+    \item \textbf{Patch Effectiveness}: v18.1 fixed \textbf{22\%} of vulnerabilities compared to v18.0
+    \item \textbf{Support Window}: 5-year lifecycle per major version
+    \item \textbf{Latest Supported}: Version 18 (EOL: Nov 2030)
+    \item \textbf{Next EOL Event}: Version 14 (Nov 2026)
+    \item \textbf{Tools Used}: \texttt{geol} 2.7.1, \texttt{trivy} 0.69.1
+\end{itemize}
+\end{multicols}
+
+\vspace{0.5cm}
+
+\begin{tcolorbox}[colback=lightorange!30, colframe=vuln-high, title=⚠️ Immediate Action Required, fonttitle=\bfseries]
+\textbf{If running PostgreSQL ≤13:}
+\begin{enumerate}
+    \item Run \texttt{geol check} to verify EOL status
+    \item Scan images: \texttt{trivy image postgres:X}
+    \item Plan migration to version ≥14 within 30 days
+    \item Review Section \ref{sec:recommendations} for detailed upgrade paths
+\end{enumerate}
+\end{tcolorbox}
+
+\vspace{0.3cm}
+
+\begin{center}
+\textit{Full analysis with charts, CVE details, and migration strategies follows...}
+\end{center}
+
 \newpage
 
 \section{Executive Summary}
@@ -185,6 +275,10 @@ An unsupported version is a \textbf{gateway to unpatched vulnerabilities.}
 The second step is to analyze the "attack surface" of Docker images. It's important to note that while we use major version Docker tags (e.g., \texttt{postgres:18}), these tags typically point to the latest patch release within that major version series (e.g., \texttt{postgres:18} currently refers to \texttt{postgres:18.1}).
 
 Table \ref{tab:trivy} and Figure \ref{fig:vuln-chart} show the results.
+
+\begin{tcolorbox}[colback=lightred!30, colframe=vuln-critical, title=⚠️ Critical Finding: EOL Version Vulnerability Gap, fonttitle=\bfseries]
+\textbf{Unsupported versions (9.6-13) contain 2-10× more vulnerabilities than supported versions (14-18).} PostgreSQL 12 alone has \textbf{305 total vulnerabilities} including \textbf{9 critical CVEs}, compared to just \textbf{113 total} and \textbf{0 critical} in version 17.
+\end{tcolorbox}
 
 \begin{table}[htbp]
 \centering
@@ -446,6 +540,16 @@ To illustrate the importance of patch releases, we compare the vulnerabilities f
 \end{tabular}
 \end{table}
 
+\begin{tcolorbox}[colback=lightorange!20, colframe=vuln-high, title=📊 Patch Release Value: 18.0 → 18.1 Analysis, fonttitle=\bfseries]
+The upgrade from 18.0 to 18.1 delivered immediate security improvements:
+\begin{itemize}
+    \item \textbf{75\% reduction} in critical CVEs (4 → 1)
+    \item \textbf{43\% reduction} in high-severity issues (30 → 17)
+    \item \textbf{22\% overall reduction} in total vulnerabilities (204 → 159)
+\end{itemize}
+\textbf{Recommendation:} Always deploy the latest patch within your chosen major version.
+\end{tcolorbox}
+
 \begin{figure}[htbp]
 \centering
 \begin{tikzpicture}
@@ -477,8 +581,36 @@ To illustrate the importance of patch releases, we compare the vulnerabilities f
 The updates from 18.0 to 18.1 and then to 18.2 significantly reduced the number of critical, high, and medium vulnerabilities, demonstrating the effectiveness of minor releases in addressing security issues. For detailed changes, refer to the respective changelogs: \href{https://www.postgresql.org/docs/18/release-18.html}{18.0}, \href{https://www.postgresql.org/docs/18/release-18-1.html}{18.1}, and \href{https://www.postgresql.org/docs/18/release-18-2.html}{18.2}.
 
 \section{Recommendations}
+\label{sec:recommendations}
 
 Based on the comprehensive security analysis presented in this report, the following actions are recommended:
+
+\subsection{Migration Impact: Before \& After}
+
+To illustrate the concrete security benefits of upgrading, here's a comparison of migrating from an EOL version to a supported version:
+
+\begin{table}[htbp]
+\centering
+\caption{Security Impact of Upgrading from PostgreSQL 12 to 17}
+\label{tab:before-after}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Metric} & \textbf{Before (v12)} & \textbf{After (v17)} \\ \midrule
+\rowcolor{lightred} Critical CVEs & 9 & 0 \\
+\rowcolor{lightorange} High CVEs & 70 & 6 \\
+\rowcolor{lightorange} Medium CVEs & 100 & 9 \\
+\rowcolor{lightgreen} Low CVEs & 124 & 98 \\
+\midrule
+\textbf{Total Vulnerabilities} & \textbf{305} & \textbf{113} \\
+\rowcolor{lightgreen} \textbf{Risk Reduction} & - & \textbf{63\%} \\
+\rowcolor{lightgreen} Support Status & \textbf{EOL'd (Nov 2024)} & \textbf{Supported until Nov 2029} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{tcolorbox}[colback=lightgreen!20, colframe=gantt-supported, title=💡 Business Case for Migration, fonttitle=\bfseries]
+Upgrading from PostgreSQL 12 to 17 eliminates \textbf{all 9 critical vulnerabilities}, reduces high-severity issues by \textbf{91\%}, and provides \textbf{5 years of continued support}. The security ROI is immediate and substantial.
+\end{tcolorbox}
 
 \subsection{Immediate Actions (Critical Priority)}
 
@@ -524,6 +656,7 @@ Tools like \texttt{geol} and \texttt{trivy} are essential in a modern DevSecOps 
 
 \section{Resources}
 
+\begin{multicols}{2}
 \begin{itemize}
     \item \href{https://dev.to/adriens/geol-the-cli-to-efficiently-manage-eols-like-a-boss-3hne}{geol, the cli to efficiently manage EOLs like a boss}
     \item \href{https://youtu.be/ZqiXogK2fSw}{geol - Gérer la fin de vie (notebookLM slideshow) v1.3.0 - "for dummies" edition}
@@ -533,5 +666,6 @@ Tools like \texttt{geol} and \texttt{trivy} are essential in a modern DevSecOps 
     \item \href{https://www.postgresql.org/about/news/postgresql-181-177-1611-1515-1420-and-1323-released-3171/}{PostgreSQL 18.1, 17.7, 16.11, 15.15, 14.20, and 13.23 Released!}
     \item \href{https://endoflife.date/postgresql}{PostgreSQL EOL Data}
 \end{itemize}
+\end{multicols}
 
 \end{document}
