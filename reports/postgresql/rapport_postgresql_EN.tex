@@ -292,11 +292,27 @@ To quantify the security risk of each PostgreSQL version, we apply a weighted ri
 
 \noindent where $n_i$ represents the number of vulnerabilities at each severity level, and $w_i$ are the corresponding weights reflecting the relative security impact.
 
-Risk levels are classified as:
+\vspace{0.3cm}
+
+\noindent\textbf{Risk Classification with Severity Overrides:}
+
+To prevent misclassification of versions with few but critical vulnerabilities, we apply severity-based override rules:
+
+\begin{tcolorbox}[colback=lightgray!20, colframe=black!50, title=Risk Level Determination Logic, fonttitle=\bfseries]
+\begin{enumerate}
+    \item \textcolor{vuln-critical}{\textbf{High Risk:}} Score $>$ 300 \textbf{OR} $n_{\text{Critical}} \geq 3$
+    \item \textcolor{vuln-medium}{\textbf{Medium Risk:}} Score $\in$ [150, 300] \textbf{OR} $n_{\text{Critical}} \geq 1$
+    \item \textcolor{gantt-supported}{\textbf{Low Risk:}} Score $<$ 150 \textbf{AND} $n_{\text{Critical}} = 0$
+\end{enumerate}
+\end{tcolorbox}
+
+\vspace{0.2cm}
+
+\noindent This ensures that:
 \begin{itemize}
-    \item \textcolor{gantt-supported}{\textbf{Low Risk ($<$150):}} Acceptable for production use
-    \item \textcolor{vuln-medium}{\textbf{Medium Risk (150-300):}} Requires monitoring and upgrade planning
-    \item \textcolor{vuln-critical}{\textbf{High Risk ($>$300):}} Critical - immediate action required
+    \item Any version with 3+ critical CVEs is \textbf{automatically High Risk}, regardless of score
+    \item Any version with 1+ critical CVE is \textbf{at least Medium Risk}
+    \item Only versions with \textbf{zero critical CVEs} can achieve Low Risk status
 \end{itemize}
 
 Table \ref{tab:trivy} and Figure \ref{fig:vuln-chart} show the results.
