@@ -285,8 +285,12 @@ The second step is to analyze the "attack surface" of Docker images. It's import
 To quantify the security risk of each PostgreSQL version, we apply a weighted risk scoring formula that prioritizes critical and high-severity vulnerabilities:
 
 \begin{equation}
-\text{Risk Score} = (\text{Critical} \times 10) + (\text{High} \times 5) + (\text{Medium} \times 2) + (\text{Low} \times 1)
+\boxed{
+\text{Risk Score} = \sum_{i} w_i \cdot n_i = 10 \cdot n_{\text{Critical}} + 5 \cdot n_{\text{High}} + 2 \cdot n_{\text{Medium}} + 1 \cdot n_{\text{Low}}
+}
 \end{equation}
+
+\noindent where $n_i$ represents the number of vulnerabilities at each severity level, and $w_i$ are the corresponding weights reflecting the relative security impact.
 
 Risk levels are classified as:
 \begin{itemize}
