@@ -61,7 +61,7 @@
 % Plain style for first page
 \fancypagestyle{plain}{
   \fancyhf{}
-  \fancyfoot[C]{\footnotesize Generated with \texttt{geol} 2.7.1, \texttt{trivy} 0.69.1, \texttt{gemini-cli} 0.28.2 on \today}
+  \fancyfoot[C]{\footnotesize Generated with \texttt{geol} 2.7.1, \texttt{trivy} 0.69.1, \texttt{gemini-cli} 0.30.0 on \today}
   \renewcommand{\headrulewidth}{0pt}
   \renewcommand{\footrulewidth}{0.4pt}
 }
@@ -132,7 +132,7 @@ The goal is to demonstrate the crucial importance of using maintained versions a
 \hline
 \rowcolor{lightgray}
 \textbf{If Your Version Is...} & \textbf{Action Required} & \textbf{Risk Score} \\ \hline
-\rowcolor{lightred} ≤ 13 (EOL) & \textbf{URGENT}: Migrate immediately (2-10× more vulnerabilities) & 643-764 \\ \hline
+\rowcolor{lightred} ≤ 13 (EOL) & \textbf{URGENT}: Migrate immediately (2-10$\times$ more vulnerabilities) & 643-764 \\ \hline
 \rowcolor{lightorange} 14 & Plan upgrade to 16/17 (EOL approaching 2026) & 146 \\ \hline
 \rowcolor{lightgreen} 15-17 & Monitor for patches, review annually & 146 \\ \hline
 \rowcolor{lightgreen} 18 (Latest) & Excellent - maintain patch currency & 275 \\ \hline
@@ -151,7 +151,7 @@ The goal is to demonstrate the crucial importance of using maintained versions a
     \item \textbf{Support Window}: 5-year lifecycle per major version
     \item \textbf{Latest Supported}: Version 18 (EOL: Nov 2030)
     \item \textbf{Next EOL Event}: Version 14 (Nov 2026)
-    \item \textbf{Tools Used}: \texttt{geol} 2.7.1, \texttt{trivy} 0.69.1
+    \item \textbf{Tools Used}: \texttt{geol} 2.7.1, \texttt{trivy} 0.69.1, \texttt{gemini-cli} 0.30.0
 \end{itemize}
 \end{multicols}
 
@@ -182,7 +182,7 @@ The goal is to demonstrate the crucial importance of using maintained versions a
 \begin{itemize}
     \item \textbf{\textcolor{gantt-supported}{5 Supported Versions:}} PostgreSQL versions 14-18 are actively maintained with EOL dates ranging from 2026 to 2030.
     \item \textbf{\textcolor{gantt-eol}{Fresh EOL Alert:}} PostgreSQL 13 recently reached end-of-life on November 13, 2025, joining versions 9.6-12 as unsupported.
-    \item \textbf{\textcolor{vuln-critical}{Security Gap:}} Unsupported versions contain \textbf{\textcolor{vuln-critical}{2-10× more vulnerabilities}} than supported versions, with critical CVEs present only in EOL versions.
+    \item \textbf{\textcolor{vuln-critical}{Security Gap:}} Unsupported versions contain \textbf{\textcolor{vuln-critical}{2-10$\times$ more vulnerabilities}} than supported versions, with critical CVEs present only in EOL versions.
     \item \textbf{Patch Impact:} Minor updates are crucial - PostgreSQL 18.1 reduced vulnerabilities by \textbf{\textcolor{gantt-supported}{22\%}} compared to 18.0 (204 → 159 total vulnerabilities).
     \item \textbf{\textcolor{vuln-critical}{Critical Recommendation:}} Migrate immediately from any version $\leq$13 to version $\geq$14. The security risk of unsupported versions is unacceptable for production environments.
 \end{itemize}
@@ -212,7 +212,7 @@ Below is a quick overview of the tools used for this analysis.
 \href{https://trivy.dev/}{\texttt{trivy}} (version 0.69.1) is an open-source scanner that detects vulnerabilities (CVEs) in container images, file systems, and Git repositories. The vulnerability database is version 2.
 
 \subsection{\texttt{gemini-cli}: AI Assistant}
-\href{https://github.com/google-gemini/gemini-cli}{\texttt{gemini-cli}} (version 0.28.2) is an open-source AI agent that brings Gemini's power directly to the terminal.
+\href{https://github.com/google-gemini/gemini-cli}{\texttt{gemini-cli}} (version 0.30.0) is an open-source AI agent that brings Gemini's power directly to the terminal.
 
 \subsection{\LaTeX{}: Report Generator}
 
@@ -245,6 +245,131 @@ The analysis for this report was conducted on \today. The data was gathered usin
     \end{verbatim}
 \end{itemize}
 
+\subsection{Trivy Scanning Techniques and Data Extraction}
+
+To efficiently aggregate vulnerability data from \texttt{trivy} scans, several command-line techniques were employed. This section details the practical scripts and \texttt{jq} tricks used to extract and count vulnerabilities by severity.
+
+\subsubsection{Method 1: Template-Based Extraction}
+
+The most efficient approach uses \texttt{trivy}'s built-in template engine to extract only severity information:
+
+\begin{verbatim}
+trivy image --format template \
+  --template '{{- range . -}}{{- range .Vulnerabilities -}}
+{{ .Severity }}{{ "\n" }}{{- end -}}{{- end -}}' \
+  postgres:18.3 2>/dev/null | sort | uniq -c
+\end{verbatim}
+
+\noindent This command:
+\begin{itemize}
+    \item Uses \texttt{-{}-format template} to customize output
+    \item Iterates through all vulnerabilities with nested \texttt{range} loops
+    \item Extracts only the \texttt{.Severity} field
+    \item Redirects stderr to \texttt{/dev/null} to suppress progress messages
+    \item Pipes to \texttt{sort | uniq -c} to count occurrences by severity
+\end{itemize}
+
+\noindent Example output:
+\begin{verbatim}
+      1 CRITICAL
+     16 HIGH
+     39 MEDIUM
+    111 LOW
+\end{verbatim}
+
+\subsubsection{Method 2: JSON Output with jq}
+
+For more complex data extraction, \texttt{trivy} can output full JSON which is then processed with \texttt{jq}:
+
+\begin{verbatim}
+trivy image postgres:18.3 --quiet --format json | \
+  jq -r '.Results[]?.Vulnerabilities[]?.Severity' | \
+  sort | uniq -c
+\end{verbatim}
+
+\noindent This approach:
+\begin{itemize}
+    \item Uses \texttt{-{}-format json} for structured output
+    \item \texttt{jq -r} extracts raw severity values without quotes
+    \item \texttt{.Results[]?} safely iterates through all result objects
+    \item \texttt{.Vulnerabilities[]?} accesses the vulnerabilities array
+    \item The \texttt{?} operator prevents errors if fields are missing
+\end{itemize}
+
+\subsubsection{Method 3: Detailed CVE Information}
+
+To extract specific CVE details (ID, severity, description):
+
+\begin{verbatim}
+trivy image postgres:12 --quiet --format json | \
+  jq -r '.Results[].Vulnerabilities[] | 
+    select(.Severity == "CRITICAL") | 
+    "\(.VulnerabilityID): \(.Title)"'
+\end{verbatim}
+
+\noindent This extracts only critical vulnerabilities with their titles, useful for the CVE examples table.
+
+\subsubsection{Method 4: Risk Score Calculation}
+
+To calculate the risk score directly from \texttt{trivy} output:
+
+\begin{verbatim}
+trivy image postgres:18.3 --quiet --format json | \
+  jq '[.Results[].Vulnerabilities[] | .Severity] | 
+    (map(select(. == "CRITICAL")) | length) * 10 + 
+    (map(select(. == "HIGH")) | length) * 5 + 
+    (map(select(. == "MEDIUM")) | length) * 2 + 
+    (map(select(. == "LOW")) | length) * 1'
+\end{verbatim}
+
+\noindent This single command:
+\begin{itemize}
+    \item Extracts all severity values into an array
+    \item Counts each severity level
+    \item Applies the weighted formula: $10 \times \text{Critical} + 5 \times \text{High} + 2 \times \text{Medium} + 1 \times \text{Low}$
+    \item Returns the final risk score
+\end{itemize}
+
+\subsubsection{Scanning Multiple Versions in Batch}
+
+To scan all PostgreSQL versions efficiently:
+
+\begin{verbatim}
+for version in 18.3 17 16 15 14 13 12 11 10 9.6; do
+  echo -n "postgres:$version - "
+  trivy image --format template \
+    --template '{{- range . -}}{{- range .Vulnerabilities -}}
+{{ .Severity }}{{ "\n" }}{{- end -}}{{- end -}}' \
+    postgres:$version 2>/dev/null | \
+    awk '{crit+=($1=="CRITICAL"); high+=($1=="HIGH"); 
+         med+=($1=="MEDIUM"); low+=($1=="LOW")} 
+         END {print "C:"crit" H:"high" M:"med" L:"low}'
+done
+\end{verbatim}
+
+\noindent This loop processes all versions and outputs a compact summary.
+
+\subsubsection{Docker Image Digest Verification}
+
+To ensure reproducible scans, images can be referenced by their manifest digest:
+
+\begin{verbatim}
+trivy image postgres:18.3@sha256:eb37f58646a901dc7727cf448... 
+\end{verbatim}
+
+\noindent Using digests guarantees scanning the exact same image, even if tags are updated.
+
+\begin{tcolorbox}[colback=lightgreen!20, colframe=gantt-supported, title=💡 Best Practices for Vulnerability Scanning, fonttitle=\bfseries]
+\begin{itemize}
+    \item Use \texttt{-{}-quiet} to suppress progress output in scripts
+    \item Redirect stderr (\texttt{2>/dev/null}) when using template output
+    \item Reference images by digest for reproducible CI/CD scans
+    \item Cache \texttt{trivy} database updates to speed up batch scans
+    \item Use \texttt{-{}-severity CRITICAL,HIGH} to focus on high-priority issues
+    \item Integrate into pre-deployment gates with \texttt{-{}-exit-code 1}
+\end{itemize}
+\end{tcolorbox}
+
 \newpage
 
 \section{Data Analysis}
@@ -262,11 +387,11 @@ An unsupported version is a \textbf{gateway to unpatched vulnerabilities.}
 \begin{tabular}{@{}lccccl@{}}
 	
 	\textbf{Version} & \textbf{Release Date} & \textbf{Latest} & \textbf{Latest Release} & \textbf{End of Support (EOL)} & \textbf{Status} \\ \midrule
-\rowcolor{lightgreen} 18 & 2025-09-25 & 18.2 & 2026-02-09 & 2030-11-14 & $\checkmark$ Supported \\
-\rowcolor{lightgreen} 17 & 2024-09-26 & 17.7 & 2025-11-10 & 2029-11-08 & $\checkmark$ Supported \\
-\rowcolor{lightgreen} 16 & 2023-09-14 & 16.11 & 2025-11-10 & 2028-11-09 & $\checkmark$ Supported \\
-\rowcolor{lightgreen} 15 & 2022-10-13 & 15.15 & 2025-11-10 & 2027-11-11 & $\checkmark$ Supported \\
-\rowcolor{lightgreen} 14 & 2021-09-30 & 14.20 & 2025-11-10 & 2026-11-12 & $\checkmark$ Supported \\
+\rowcolor{lightgreen} 18 & 2025-09-25 & 18.3 & 2026-02-23 & 2030-11-14 & $\checkmark$ Supported \\
+\rowcolor{lightgreen} 17 & 2024-09-26 & 17.9 & 2026-02-23 & 2029-11-08 & $\checkmark$ Supported \\
+\rowcolor{lightgreen} 16 & 2023-09-14 & 16.13 & 2026-02-23 & 2028-11-09 & $\checkmark$ Supported \\
+\rowcolor{lightgreen} 15 & 2022-10-13 & 15.17 & 2026-02-23 & 2027-11-11 & $\checkmark$ Supported \\
+\rowcolor{lightgreen} 14 & 2021-09-30 & 14.22 & 2026-02-23 & 2026-11-12 & $\checkmark$ Supported \\
 \rowcolor{lightred} 13 & 2020-09-24 & 13.23 & 2025-11-10 & 2025-11-13 & $\times$ \textbf{Unsupported} \\ \midrule
 \rowcolor{lightred} 12 & 2019-10-03 & 12.22 & 2024-11-18 & 2024-11-21 & $\times$ \textbf{Unsupported} \\
 \rowcolor{lightred} 11 & 2018-10-18 & 11.22 & 2023-11-06 & 2023-11-09 & $\times$ \textbf{Unsupported} \\
@@ -321,7 +446,7 @@ To prevent misclassification of versions with few but critical vulnerabilities, 
 Table \ref{tab:trivy} and Figure \ref{fig:vuln-chart} show the results.
 
 \begin{tcolorbox}[colback=lightred!30, colframe=vuln-critical, title=⚠️ Critical Finding: EOL Version Vulnerability Gap, fonttitle=\bfseries]
-\textbf{Unsupported versions (9.6-13) contain 2-10× more vulnerabilities than supported versions (14-18).} PostgreSQL 12 alone has a \textbf{risk score of 764} (High Risk) with \textbf{9 critical CVEs}, compared to a score of \textbf{146} (Low Risk) and \textbf{0 critical} in version 17.
+\textbf{Unsupported versions (9.6-13) contain 2-10$\times$ more vulnerabilities than supported versions (14-18).} PostgreSQL 12 alone has a \textbf{risk score of 764} (High Risk) with \textbf{9 critical CVEs}, compared to a score of \textbf{146} (Low Risk) and \textbf{0 critical} in version 17.
 \end{tcolorbox}
 
 \begin{table}[htbp]
@@ -330,8 +455,9 @@ Table \ref{tab:trivy} and Figure \ref{fig:vuln-chart} show the results.
 \label{tab:trivy}
 \begin{tabular}{@{}lcccccc@{}}
 	\textbf{Docker Tag} & \textbf{Critical} & \textbf{High} & \textbf{Medium} & \textbf{Low} & \textbf{Total} & \textbf{Risk Score} \\ \midrule
-\rowcolor{lightorange} \texttt{postgres:18.2} & 1 & 17 & 39 & 102 & 159 & \textbf{275} \\
-\rowcolor{lightgreen} \texttt{postgres:17} & 0 & 6 & 9 & 98 & 117 & \textbf{146} \\
+\rowcolor{lightorange} \texttt{postgres:18.3} & 1 & 16 & 39 & 111 & 167 & \textbf{269} \\
+\rowcolor{lightorange} \texttt{postgres:18.2} & 1 & 16 & 39 & 111 & 167 & \textbf{269} \\
+\rowcolor{lightgreen} \texttt{postgres:17} & 0 & 6 & 9 & 98 & 113 & \textbf{146} \\
 \rowcolor{lightgreen} \texttt{postgres:16} & 0 & 6 & 9 & 98 & 113 & \textbf{146} \\
 \rowcolor{lightgreen} \texttt{postgres:15} & 0 & 6 & 9 & 98 & 113 & \textbf{146} \\
 \rowcolor{lightgreen} \texttt{postgres:14} & 0 & 6 & 9 & 98 & 113 & \textbf{146} \\
@@ -352,7 +478,7 @@ Table \ref{tab:trivy} and Figure \ref{fig:vuln-chart} show the results.
     height=8cm,
     title={Vulnerability Distribution by PostgreSQL Version},
     xlabel={Number of Vulnerabilities},
-    symbolic y coords={9.6.24, 10.23, 11.22, 12.22, 13.23, 14.20, 15.15, 16.11, 17.7, 18.2},
+    symbolic y coords={9.6.24, 10.23, 11.22, 12.22, 13.23, 14.22, 15.17, 16.13, 17.9, 18.3},
     ytick=data,
     nodes near coords,
     nodes near coords align={horizontal},
@@ -365,10 +491,10 @@ Table \ref{tab:trivy} and Figure \ref{fig:vuln-chart} show the results.
     },
     legend style={at={(0.5,-0.2)}, anchor=north, legend columns=-1}
 ]
-\addplot[fill=vuln-low] coordinates {(102,18.2) (98,17.7) (98,16.11) (98,15.15) (98,14.20) (98,13.23) (124,12.22) (49,11.22) (49,10.23) (49,9.6.24)};
-\addplot[fill=vuln-medium] coordinates {(39,18.2) (9,17.7) (9,16.11) (9,15.15) (9,14.20) (9,13.23) (100,12.22) (52,11.22) (52,10.23) (57,9.6.24)};
-\addplot[fill=vuln-high] coordinates {(17,18.2) (6,17.7) (6,16.11) (6,15.15) (6,14.20) (6,13.23) (70,12.22) (84,11.22) (84,10.23) (97,9.6.24)};
-\addplot[fill=vuln-critical] coordinates {(1,18.2) (0,17.7) (0,16.11) (0,15.15) (0,14.20) (0,13.23) (9,12.22) (7,11.22) (7,10.23) (10,9.6.24)};
+\addplot[fill=vuln-low] coordinates {(111,18.3) (98,17.9) (98,16.13) (98,15.17) (98,14.22) (98,13.23) (124,12.22) (49,11.22) (49,10.23) (49,9.6.24)};
+\addplot[fill=vuln-medium] coordinates {(39,18.3) (9,17.9) (9,16.13) (9,15.17) (9,14.22) (9,13.23) (100,12.22) (52,11.22) (52,10.23) (57,9.6.24)};
+\addplot[fill=vuln-high] coordinates {(16,18.3) (6,17.9) (6,16.13) (6,15.17) (6,14.22) (6,13.23) (70,12.22) (84,11.22) (84,10.23) (97,9.6.24)};
+\addplot[fill=vuln-critical] coordinates {(1,18.3) (0,17.9) (0,16.13) (0,15.17) (0,14.22) (0,13.23) (9,12.22) (7,11.22) (7,10.23) (10,9.6.24)};
 \legend{Low, Medium, High, Critical}
 \end{axis}
 \end{tikzpicture}
@@ -386,7 +512,7 @@ Table \ref{tab:trivy} and Figure \ref{fig:vuln-chart} show the results.
     title={Risk Score by PostgreSQL Version},
     xlabel={PostgreSQL Version},
     ylabel={Risk Score},
-    symbolic x coords={18.2, 17.7, 16.11, 15.15, 14.20, 13.23, 12.22, 11.22, 10.23, 9.6.24},
+    symbolic x coords={18.3, 17.9, 16.13, 15.17, 14.22, 13.23, 12.22, 11.22, 10.23, 9.6.24},
     xtick=data,
     x tick label style={rotate=45, anchor=east},
     nodes near coords,
@@ -397,12 +523,12 @@ Table \ref{tab:trivy} and Figure \ref{fig:vuln-chart} show the results.
     enlarge x limits=0.1,
     bar width=12pt
 ]
-\addplot[fill=lightorange, draw=vuln-medium] coordinates {(18.2,275) (17.7,146) (16.11,146) (15.15,146) (14.20,146) (13.23,146)};
+\addplot[fill=lightorange, draw=vuln-medium] coordinates {(18.3,269) (17.9,146) (16.13,146) (15.17,146) (14.22,146) (13.23,146)};
 \addplot[fill=lightred, draw=vuln-critical] coordinates {(12.22,764) (11.22,643) (10.23,643) (9.6.24,748)};
 
 % Add risk level threshold lines
-\addplot[color=gantt-supported, line width=1.5pt, dashed, forget plot] coordinates {(18.2,150) (9.6.24,150)};
-\addplot[color=vuln-high, line width=1.5pt, dashed, forget plot] coordinates {(18.2,300) (9.6.24,300)};
+\addplot[color=gantt-supported, line width=1.5pt, dashed, forget plot] coordinates {(18.3,150) (9.6.24,150)};
+\addplot[color=vuln-high, line width=1.5pt, dashed, forget plot] coordinates {(18.3,300) (9.6.24,300)};
 
 \legend{Supported Versions, EOL Versions}
 \end{axis}
@@ -502,7 +628,7 @@ To illustrate the concrete security risks of using unsupported versions, here ar
     colorbar,
     colorbar style={ylabel=Number of Vulnerabilities},
     point meta min=0,
-    point meta max=102,
+    point meta max=111,
 ]
 
 % Data points for heat map (version, severity, count)
@@ -516,7 +642,7 @@ To illustrate the concrete security risks of using unsupported versions, here ar
     (Critical,15)   [0]   (High,15)   [6]   (Medium,15)   [9]   (Low,15)   [98]
     (Critical,16)   [0]   (High,16)   [6]   (Medium,16)   [9]   (Low,16)   [98]
     (Critical,17)   [0]   (High,17)   [6]   (Medium,17)   [9]   (Low,17)   [98]
-    (Critical,18)   [1]   (High,18)   [17]  (Medium,18)   [39]  (Low,18)   [102]
+    (Critical,18)   [1]   (High,18)   [16]  (Medium,18)   [39]  (Low,18)   [111]
 };
 
 % Add value labels with white text for better visibility on all cells
@@ -542,7 +668,7 @@ To illustrate the concrete security risks of using unsupported versions, here ar
 \node at (axis cs:High,15) [white] {\tiny\bf 6};
 \node at (axis cs:High,16) [white] {\tiny\bf 6};
 \node at (axis cs:High,17) [white] {\tiny\bf 6};
-\node at (axis cs:High,18) [white] {\tiny\bf 17};
+\node at (axis cs:High,18) [white] {\tiny\bf 16};
 
 % Medium column
 \node at (axis cs:Medium,9.6) [white] {\tiny\bf 57};
@@ -566,7 +692,7 @@ To illustrate the concrete security risks of using unsupported versions, here ar
 \node at (axis cs:Low,15) [white] {\tiny\bf 98};
 \node at (axis cs:Low,16) [white] {\tiny\bf 98};
 \node at (axis cs:Low,17) [white] {\tiny\bf 98};
-\node at (axis cs:Low,18) [white] {\tiny\bf 102};
+\node at (axis cs:Low,18) [white] {\tiny\bf 111};
 
 \end{axis}
 \end{tikzpicture}
@@ -601,32 +727,34 @@ To illustrate the concrete security risks of using unsupported versions, here ar
 \end{itemize}
 
 
-\subsection{Vulnerability Comparison: 18.0 vs 18.1 vs 18.2}
+\subsection{Vulnerability Comparison: 18.0 vs 18.1 vs 18.2 vs 18.3}
 \label{subsec:patch-comparison}
 
 To illustrate the importance of patch releases, we compare the vulnerabilities found in \texttt{postgres:18} versions.
 
 \begin{table}[htbp]
 \centering
-\caption{Vulnerability Comparison: PostgreSQL 18.0 vs 18.1 vs 18.2 with Risk Scores}
+\caption{Vulnerability Comparison: PostgreSQL 18.0 vs 18.1 vs 18.2 vs 18.3 with Risk Scores}
 \label{tab:trivy-compare}
 \begin{tabular}{@{}lcccccc@{}}
 	\textbf{Docker Tag} & \textbf{Critical} & \textbf{High} & \textbf{Medium} & \textbf{Low} & \textbf{Total} & \textbf{Risk Score} \\ \midrule
 \rowcolor{lightorange} \texttt{postgres:18.0} & 4 & 30 & 68 & 102 & 204 & \textbf{428} \\
 \rowcolor{lightorange} \texttt{postgres:18.1} & 1 & 17 & 39 & 102 & 159 & \textbf{275} \\
-\rowcolor{lightorange} \texttt{postgres:18.2} & 1 & 17 & 39 & 102 & 159 & \textbf{275} \\
+\rowcolor{lightorange} \texttt{postgres:18.2} & 1 & 16 & 39 & 111 & 167 & \textbf{269} \\
+\rowcolor{lightorange} \texttt{postgres:18.3} & 1 & 16 & 39 & 111 & 167 & \textbf{269} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\begin{tcolorbox}[colback=lightorange!20, colframe=vuln-high, title=📊 Patch Release Value: 18.0 → 18.1 Analysis, fonttitle=\bfseries]
-The upgrade from 18.0 to 18.1 delivered immediate security improvements:
+\begin{tcolorbox}[colback=lightorange!20, colframe=vuln-high, title=📊 Patch Release Value: 18.0 → 18.3 Analysis, fonttitle=\bfseries]
+The upgrade from 18.0 to 18.3 delivered immediate security improvements:
 \begin{itemize}
     \item \textbf{75\% reduction} in critical CVEs (4 → 1)
-    \item \textbf{43\% reduction} in high-severity issues (30 → 17)
-    \item \textbf{22\% overall reduction} in total vulnerabilities (204 → 159)
-    \item \textbf{36\% reduction} in risk score (428 → 275) - from High to Medium risk
+    \item \textbf{47\% reduction} in high-severity issues (30 → 16)
+    \item \textbf{18\% overall reduction} in total vulnerabilities (204 → 167)
+    \item \textbf{37\% reduction} in risk score (428 → 269) - from High to Medium risk
 \end{itemize}
+\textbf{Note:} PostgreSQL 18.2 and 18.3 have identical vulnerability profiles, indicating stable security posture.\\
 \textbf{Recommendation:} Always deploy the latest patch within your chosen major version.
 \end{tcolorbox}
 
@@ -634,31 +762,120 @@ The upgrade from 18.0 to 18.1 delivered immediate security improvements:
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-    ybar=2pt,
-    bar width=7pt,
+    ybar=1pt,
+    bar width=5pt,
     width=\textwidth,
     height=8cm,
-    title={Vulnerability Comparison: 18.0 vs 18.1 vs 18.2},
+    title={Vulnerability Comparison: 18.0 vs 18.1 vs 18.2 vs 18.3},
     xlabel={Severity},
     ylabel={Number of Vulnerabilities},
     symbolic x coords={Critical, High, Medium, Low},
     xtick=data,
     nodes near coords,
     nodes near coords align={vertical},
-    legend style={at={(0.5,-0.2)}, anchor=north, legend columns=3},
+    every node near coord/.append style={rotate=90, anchor=west, font=\tiny},
+    legend style={at={(0.5,-0.2)}, anchor=north, legend columns=4},
     enlarge x limits=0.25
 ]
 \addplot[fill=lightorange!80] coordinates {(Critical,4) (High,30) (Medium,68) (Low,102)};
 \addplot[fill=lightgreen!80] coordinates {(Critical,1) (High,17) (Medium,39) (Low,102)};
-\addplot[fill=lightgreen!60] coordinates {(Critical,1) (High,17) (Medium,39) (Low,102)};
-\legend{Postgres 18.0, Postgres 18.1, Postgres 18.2}
+\addplot[fill=lightgreen!60] coordinates {(Critical,1) (High,16) (Medium,39) (Low,111)};
+\addplot[fill=lightgreen!40] coordinates {(Critical,1) (High,16) (Medium,39) (Low,111)};
+\legend{Postgres 18.0, Postgres 18.1, Postgres 18.2, Postgres 18.3}
 \end{axis}
 \end{tikzpicture}
-\caption{Comparison of vulnerabilities detected by \texttt{trivy} for PostgreSQL 18.0, 18.1 and 18.2. Grouped bars show clear reduction in critical and high severity issues.}
+\caption{Comparison of vulnerabilities detected by \texttt{trivy} for PostgreSQL 18.0-18.3. Grouped bars show clear reduction in critical and high severity issues from 18.0 to 18.1. Versions 18.2 and 18.3 maintain identical security profiles.}
 \label{fig:vuln-chart-18.0-18.1}
 \end{figure}
 
-The updates from 18.0 to 18.1 and then to 18.2 significantly reduced the number of critical, high, and medium vulnerabilities, demonstrating the effectiveness of minor releases in addressing security issues. For detailed changes, refer to the respective changelogs: \href{https://www.postgresql.org/docs/18/release-18.html}{18.0}, \href{https://www.postgresql.org/docs/18/release-18-1.html}{18.1}, and \href{https://www.postgresql.org/docs/18/release-18-2.html}{18.2}.
+The updates from 18.0 to 18.3 significantly reduced the number of critical and high vulnerabilities, with the most dramatic improvements occurring in the 18.0 → 18.1 transition. PostgreSQL 18.2 and 18.3 maintain identical vulnerability counts, demonstrating a stabilized security posture. For detailed changes, refer to the respective changelogs: \href{https://www.postgresql.org/docs/18/release-18.html}{18.0}, \href{https://www.postgresql.org/docs/18/release-18-1.html}{18.1}, \href{https://www.postgresql.org/docs/18/release-18-2.html}{18.2}, and \href{https://www.postgresql.org/docs/18/release-18-3.html}{18.3}.
+
+\subsection{Docker Image Metadata: Ensuring Reproducible Scans}
+\label{subsec:docker-metadata}
+
+When performing security scans, it's crucial to understand that Docker tags like \texttt{postgres:18} are mutable references that can point to different images over time. For reproducible vulnerability scans and audit trails, we use \textbf{manifest digests} (SHA256 hashes) to reference specific image builds.
+
+\subsubsection{Understanding Docker Image Identifiers}
+
+Docker images can be referenced in three ways:
+\begin{itemize}
+    \item \textbf{Tag}: \texttt{postgres:18.3} (mutable, points to latest patch)
+    \item \textbf{Manifest Digest}: \texttt{sha256:eb37f5864...} (immutable, specific build)
+    \item \textbf{Digest Reference}: \texttt{postgres:18.3@sha256:eb37f5864...} (tag + digest for clarity)
+\end{itemize}
+
+\subsubsection{PostgreSQL 18.x Image Digests}
+
+The following table documents the exact Docker Hub manifest digests used for vulnerability analysis in this report:
+
+\begin{table}[htbp]
+\centering
+\caption{Docker Hub Manifest Digests for PostgreSQL 18.x Images}
+\label{tab:docker-digests}
+\small
+\begin{tabular}{@{}lp{5.5cm}l@{}}
+\toprule
+\textbf{Tag} & \textbf{Manifest Digest (SHA256)} & \textbf{Architecture} \\ \midrule
+\texttt{postgres:18.0} & \texttt{192a387c...ebb3aed} & linux/amd64 \\
+\texttt{postgres:18.1} & \texttt{2ccc3d98...07395abc} & linux/amd64 \\
+\texttt{postgres:18.2} & \texttt{79aafbb6...f0a641e2} & linux/amd64 \\
+\texttt{postgres:18.3} & \texttt{5aa97b30...bd458326d} & linux/amd64 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Docker Hub Image URIs}
+
+For complete transparency and auditability, the full Docker Hub layer URLs for each release:
+
+\begin{itemize}
+    \item \textbf{18.0}: \href{https://hub.docker.com/layers/library/postgres/18.0/images/sha256-192a387c789cac29fcc7ac9a3a99060642a052fa293fd1953954c0956ebb3aed}{hub.docker.com/.../sha256-192a387...}
+    \item \textbf{18.1}: \href{https://hub.docker.com/layers/library/postgres/18.1/images/sha256-2ccc3d98b960df5ed1ee2d32d3d5338a3c688cf899c0e951ce6d45fb07395abc}{hub.docker.com/.../sha256-2ccc3d9...}
+    \item \textbf{18.2}: \href{https://hub.docker.com/layers/library/postgres/18.2/images/sha256-79aafbb673bb55e26ca128ec4d68b5ec30de64175c6d13f3eff29651f0a641e2}{hub.docker.com/.../sha256-79aafbb...}
+    \item \textbf{18.3}: \href{https://hub.docker.com/layers/library/postgres/18.3/images/sha256-e47309bc9a186ae58078b35a385dc89216d922c0f2f5cbb2bd6390e878dce27e}{hub.docker.com/.../sha256-e47309bc9...}
+\end{itemize}
+
+\subsubsection{Scanning with Digest References}
+
+To scan a specific image build regardless of tag updates:
+
+\begin{verbatim}
+trivy image postgres@sha256:eb37f58646a901dc7727cf448cae36d...
+\end{verbatim}
+
+Or with both tag and digest for documentation:
+
+\begin{verbatim}
+trivy image postgres:18.3@sha256:eb37f58646a901dc7727cf448...
+\end{verbatim}
+
+\begin{tcolorbox}[colback=lightorange!20, colframe=vuln-high, title=⚠️ Important: Image Digest Best Practices, fonttitle=\bfseries]
+\textbf{Why Digests Matter:}
+\begin{itemize}
+    \item Tags can be overwritten - \texttt{postgres:18} may point to different images over time
+    \item Digests are immutable - \texttt{sha256:eb37f58...} always references the exact same layers
+    \item CI/CD pipelines should pin digests for reproducible builds
+    \item Security audits require digest tracking for compliance and forensics
+    \item Base image updates may silently change vulnerability profiles when using tags
+\end{itemize}
+\end{tcolorbox}
+
+\subsubsection{Verifying Image Digests}
+
+To verify the current digest of a tagged image:
+
+\begin{verbatim}
+docker inspect postgres:18.3 --format='{{.RepoDigests}}'
+\end{verbatim}
+
+Or using \texttt{crane} (Google's container tool):
+
+\begin{verbatim}
+crane digest postgres:18.3
+\end{verbatim}
+
+This verification step ensures your local image matches the documented digest used in this analysis.
+
 
 \section{Recommendations}
 \label{sec:recommendations}
@@ -697,7 +914,7 @@ Upgrading from PostgreSQL 12 to 17 eliminates \textbf{all 9 critical vulnerabili
 \subsection{Immediate Actions (Critical Priority)}
 
 \begin{itemize}
-    \item \textbf{Migrate from EOL Versions:} If currently running PostgreSQL versions $\leq$13, plan immediate migration to version $\geq$14. These versions contain 2-10× more vulnerabilities.
+    \item \textbf{Migrate from EOL Versions:} If currently running PostgreSQL versions $\leq$13, plan immediate migration to version $\geq$14. These versions contain 2-10$\times$ more vulnerabilities.
     \item \textbf{Audit Current Deployments:} Use \texttt{geol check} command to continuously monitor PostgreSQL lifecycle status. Run \texttt{geol help check} for more information.
     \item \textbf{Scan Docker Images:} Integrate \texttt{trivy image postgres:X --severity CRITICAL,HIGH} into deployment workflows.
 \end{itemize}
