@@ -1,10 +1,10 @@
 # OpenBao Security Evolution Report
 
 [![PDF Report](https://img.shields.io/badge/PDF-Download%20Report-red?style=for-the-badge&logo=adobe)](vulnerability_report.pdf)
-[![OpenBao](https://img.shields.io/badge/OpenBao-v2.4.0--v2.5.4-blue?style=for-the-badge)](https://openbao.org/)
-[![Trivy](https://img.shields.io/badge/Trivy-v0.70.0-green?style=for-the-badge)](https://trivy.dev/)
+[![OpenBao](https://img.shields.io/badge/OpenBao-v2.4.0--v2.5.5-blue?style=for-the-badge)](https://openbao.org/)
+[![Trivy](https://img.shields.io/badge/Trivy-v0.71.1-green?style=for-the-badge)](https://trivy.dev/)
 
-> **Comprehensive security analysis of OpenBao container images from v2.4.0 to v2.5.4**
+> **Comprehensive security analysis of OpenBao container images from v2.4.0 to v2.5.5**
 
 ## 📊 Executive Summary
 
@@ -38,7 +38,7 @@ The **11-page report** includes:
 The report analyzes the following OpenBao versions:
 
 ```
-2.4.0 → 2.4.1 → 2.4.3 → 2.4.4 → 2.5.0 → 2.5.1 → 2.5.2 → 2.5.3 → 2.5.4
+2.4.0 → 2.4.1 → 2.4.3 → 2.4.4 → 2.5.0 → 2.5.1 → 2.5.2 → 2.5.3 → 2.5.4 → 2.5.5
 ```
 
 ### Security Score Evolution
@@ -49,15 +49,16 @@ The report analyzes the following OpenBao versions:
 | 2.5.0   | 7        | 35   | 16     | 8   | 66    | 35.9      | 🟠 MEDIUM  |
 | 2.5.3   | 0        | 9    | 4      | 1   | 14    | 87.9      | 🟢 LOW     |
 | 2.5.4   | 0        | 4    | 1      | 1   | 6     | 94.9      | 🟢 LOW     |
+| 2.5.5   | 0        | 5    | 3      | 1   | 9     | 92.8      | 🟢 LOW     |
 
 ## 🛠️ Methodology
 
 ### Tools Used
 
-- **[Trivy v0.70.0](https://trivy.dev/)**: Container vulnerability scanner
+- **[Trivy v0.71.1](https://trivy.dev/)**: Container vulnerability scanner
   - CVE Database updated: 2026-05-20
   - Format: JSON output for reproducibility
-- **[Geol v2.12.3](https://github.com/adriens/geol)**: Product lifecycle information
+- **[Geol v2.14.0](https://github.com/adriens/geol)**: Product lifecycle information
 - **LaTeX (XeLaTeX)**: Professional PDF report generation
 
 ### Scan Process

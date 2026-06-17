@@ -2,7 +2,7 @@
 
 echo "=== 1. Données pour graphique empilé ==="
 echo "Version,Critical,High,Medium,Low"
-for version in 2.4.0 2.4.1 2.4.3 2.4.4 2.5.0 2.5.1 2.5.2 2.5.3 2.5.4; do
+for version in 2.4.0 2.4.1 2.4.3 2.4.4 2.5.0 2.5.1 2.5.2 2.5.3 2.5.4 2.5.5; do
   file="openbao_v${version}.json"
   if [ -f "$file" ]; then
     critical=$(jq -r '[.Results[].Vulnerabilities[]? | select(.Severity=="CRITICAL")] | length' "$file")
@@ -17,7 +17,7 @@ echo ""
 echo "=== 2. Taux de réduction entre versions ==="
 prev_total=0
 prev_version=""
-for version in 2.4.0 2.4.1 2.4.3 2.4.4 2.5.0 2.5.1 2.5.2 2.5.3 2.5.4; do
+for version in 2.4.0 2.4.1 2.4.3 2.4.4 2.5.0 2.5.1 2.5.2 2.5.3 2.5.4 2.5.5; do
   file="openbao_v${version}.json"
   if [ -f "$file" ]; then
     total=$(jq -r '[.Results[].Vulnerabilities[]?] | length' "$file")
@@ -46,7 +46,7 @@ done
 
 echo ""
 echo "=== 5. Timeline des versions (dates de création des images) ==="
-for version in 2.4.0 2.4.1 2.4.3 2.4.4 2.5.0 2.5.1 2.5.2 2.5.3 2.5.4; do
+for version in 2.4.0 2.4.1 2.4.3 2.4.4 2.5.0 2.5.1 2.5.2 2.5.3 2.5.4 2.5.5; do
   file="openbao_v${version}.json"
   if [ -f "$file" ]; then
     created=$(jq -r '.Metadata.ImageConfig.created // "N/A"' "$file")
