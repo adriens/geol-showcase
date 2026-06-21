@@ -2,15 +2,30 @@
 
 This document provides comprehensive methodology and technical guidelines for the Gemini CLI Agent to update the `vulnerability_report.tex` when new versions of OpenBao are released.
 
-**Last Updated**: 2026-05-21 (for OpenBao v2.5.4)  
-**Report Features**: 11 pages with Executive Summary, Security Scores, CVE Analysis, Timeline
+**Last Updated**: 2026-06-22 (for OpenBao v2.5.5, Trivy 0.71.2)  
+**Report Features**: 12 pages with Executive Summary, Security Scores, CVE Analysis, Timeline
 
 ## 1. Vulnerability Scanning (Trivy)
 
-For each new version `vX.Y.Z`, run a Trivy scan in JSON format:
+> **Important (methodology):** to keep version-to-version comparisons valid,
+> **rescan ALL analyzed tags in a single session against the same Trivy DB.**
+> Scanning versions weeks apart introduces database drift (a version looks
+> "cleaner" only because its scan predates newly disclosed CVEs). Use the
+> provided `Taskfile.yml`:
+>
+> ```bash
+> task rescan        # download DB once, then scan every tag with --skip-db-update
+> task verify        # confirm all JSON share the same CreatedAt / Trivy version
+> ```
+>
+> Note: the Docker tag has no `v` prefix (`openbao/openbao:2.4.0`) while the
+> JSON output keeps it (`openbao_v2.4.0.json`).
+
+For a single new version `vX.Y.Z`, run a Trivy scan in JSON format (then
+rerun a full `task rescan` so every version uses the refreshed DB):
 
 ```bash
-trivy image --format json --output openbao_vX.Y.Z.json openbao/openbao:vX.Y.Z
+trivy image --format json --output openbao_vX.Y.Z.json openbao/openbao:X.Y.Z
 ```
 
 ## 2. Data Extraction
@@ -223,7 +238,7 @@ All scripts are in the same directory:
 
 ## 13. Report Sections Overview
 
-Current report structure (11 pages):
+Current report structure (12 pages):
 
 1. **Title & Abstract** (1 page)
 2. **Executive Summary** (2 pages)
