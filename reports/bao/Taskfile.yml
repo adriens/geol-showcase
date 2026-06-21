@@ -1,0 +1,67 @@
+# https://taskfile.dev
+#
+# OpenBao security report — homogeneous Trivy rescan
+#
+# Goal: scan ALL analyzed image versions in a single session, against the
+# SAME Trivy vulnerability DB, so version-to-version comparisons are valid.
+# (See GEMINI.md §12 "CVE database drift".)
+
+version: '3'
+
+vars:
+  IMAGE: openbao/openbao
+  # All analyzed tags. Keep in sync with the report's "Analyzed Image Tags".
+  VERSIONS: >-
+    v2.4.0 v2.4.1 v2.4.3 v2.4.4
+    v2.5.0 v2.5.1 v2.5.2 v2.5.3 v2.5.4 v2.5.5
+
+tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - task --list
+    silent: true
+
+  update-db:
+    desc: Download the latest Trivy vulnerability DB once (shared by all scans)
+    cmds:
+      - trivy image --download-db-only
+
+  rescan:
+    desc: Rescan every version with the SAME (already-downloaded) Trivy DB
+    deps: [update-db]
+    cmds:
+      - for: { var: VERSIONS }
+        cmd: |
+          # JSON keeps the "v" prefix (openbao_v2.4.0.json),
+          # but the Docker tag has none (openbao/openbao:2.4.0).
+          TAG="{{.ITEM}}"
+          echo "==> Scanning {{.IMAGE}}:${TAG#v}"
+          trivy image \
+            --skip-db-update \
+            --format json \
+            --output "openbao_${TAG}.json" \
+            "{{.IMAGE}}:${TAG#v}"
+      - task: verify
+
+  rescan-one:
+    desc: 'Rescan a single tag, e.g. `task rescan-one -- v2.5.5`'
+    deps: [update-db]
+    cmds:
+      - |
+        TAG="{{.CLI_ARGS}}"
+        if [ -z "$TAG" ]; then echo "Usage: task rescan-one -- vX.Y.Z" >&2; exit 1; fi
+        echo "==> Scanning {{.IMAGE}}:${TAG#v}"
+        trivy image --skip-db-update --format json \
+          --output "openbao_$TAG.json" "{{.IMAGE}}:${TAG#v}"
+
+  verify:
+    desc: Show scan timestamp & Trivy version per JSON (should all match)
+    cmds:
+      - |
+        printf "%-22s %-34s %s\n" "FILE" "CreatedAt" "Trivy"
+        for f in openbao_v*.json; do
+          printf "%-22s %-34s %s\n" "$f" \
+            "$(jq -r '.CreatedAt' "$f")" \
+            "$(jq -r '.Trivy.Version' "$f")"
+        done

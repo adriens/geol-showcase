@@ -1,10 +1,10 @@
 {
   "SchemaVersion": 2,
   "Trivy": {
-    "Version": "0.71.1"
+    "Version": "0.71.2"
   },
-  "ReportID": "019ed742-3963-7ee6-9999-80f5dff9c927",
-  "CreatedAt": "2026-06-18T07:25:02.051980106+11:00",
+  "ReportID": "019eebd8-bfe4-7d15-b8e0-8d731579631e",
+  "CreatedAt": "2026-06-22T07:21:51.204860852+11:00",
   "ArtifactID": "sha256:b0f4734bd760875ccaed6b4ccbb7c2256790a83b27d4cbc2671af3ada24c3230",
   "ArtifactName": "openbao/openbao:2.5.5",
   "ArtifactType": "container_image",
