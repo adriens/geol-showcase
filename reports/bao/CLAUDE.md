@@ -1,8 +1,8 @@
 # OpenBao Security Report Maintenance Guidelines
 
-This document provides comprehensive methodology and technical guidelines for the Gemini CLI Agent to update the `vulnerability_report.tex` when new versions of OpenBao are released.
+This document provides comprehensive methodology and technical guidelines for Claude Code to update the `vulnerability_report.tex` when new versions of OpenBao are released.
 
-**Last Updated**: 2026-06-22 (for OpenBao v2.5.5, Trivy 0.71.2)  
+**Last Updated**: 2026-07-16 (for OpenBao v2.6.0, Trivy 0.72.0)  
 **Report Features**: 12 pages with Executive Summary, Security Scores, CVE Analysis, Timeline
 
 ## 1. Vulnerability Scanning (Trivy)
@@ -44,6 +44,32 @@ Identify the Alpine Linux version used:
 jq -r '.Metadata.OS.Name' openbao_vX.Y.Z.json
 ```
 
+### 2.3 Base OS Freshness (Latest-Alpine-at-Release-Time Check)
+
+`geol` only exposes Alpine's **current** cycle-level metadata (`releaseDate`,
+`latest`, `latestReleaseDate` per cycle, e.g. `3.22`) — it does not retain
+patch-level history, so it cannot answer "what was the latest Alpine patch
+*on that specific past date*?" on its own.
+
+```bash
+geol product extended alpine-linux -n 0 --json
+```
+
+To get patch-level history, cross-reference with the Docker Hub tag API,
+which timestamps every `alpine:X.Y.Z` tag push:
+
+```bash
+curl -s "https://hub.docker.com/v2/repositories/library/alpine/tags?page_size=100&name=3.2" \
+  | jq -r '.results[] | select(.name | test("^3\\.(2[0-4])(\\.[0-9]+)?$")) | [.name, .tag_last_pushed] | @tsv' \
+  | sort -V
+```
+
+For each OpenBao image, compare its `Metadata.ImageConfig.created` timestamp
+against this Alpine tag-date list: the OpenBao build "used the latest Alpine
+available" if no `alpine:3.x.y` tag newer than the one it shipped had been
+published before the OpenBao image's own build date. Record this as a
+Yes/No column in the Base Image Analysis table (Section 4 below).
+
 ## 3. Lifecycle Information (Geol)
 
 Check for EOL dates or current version status using `geol`:
@@ -56,7 +82,7 @@ geol product openbao
 
 Update the following sections in `vulnerability_report.tex`:
 
-- **`Base Image Analysis` Table:** Add the new version and its Alpine base.
+- **`Base Image Analysis` Table:** Add the new version, its Alpine base, and the "Latest at Release?" freshness check (§2.3).
 - **`Vulnerability Evolution` Table:** Add the new version's counts (Critical, High, Medium, Low, Unknown).
 - **`Overall Security Trend Chart` (PGFPlots):** 
     - Add the version to `symbolic x coords`.
@@ -132,7 +158,7 @@ Update the following sections in `vulnerability_report.tex`:
 - **Risk Level Matrix**: Add new version row with colored cells
 
 ### 7.3 Main Analysis Sections
-- **Base Image Analysis Table**: Add new version + Alpine version
+- **Base Image Analysis Table**: Add new version + Alpine version + freshness check (§2.3)
 - **Vulnerability Evolution Table**: Add new version with all severity counts
 - **Overall Security Trend Chart**: 
   - Add version to `symbolic x coords`
@@ -193,7 +219,7 @@ Key findings:
 - New version score: XX.X/100
 - [Notable changes]
 
-Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
 ```
 
 ### 9.3 Push

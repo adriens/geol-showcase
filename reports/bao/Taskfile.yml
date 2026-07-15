@@ -4,7 +4,7 @@
 #
 # Goal: scan ALL analyzed image versions in a single session, against the
 # SAME Trivy vulnerability DB, so version-to-version comparisons are valid.
-# (See GEMINI.md §12 "CVE database drift".)
+# (See CLAUDE.md §12 "CVE database drift".)
 
 version: '3'
 
@@ -13,7 +13,7 @@ vars:
   # All analyzed tags. Keep in sync with the report's "Analyzed Image Tags".
   VERSIONS: >-
     v2.4.0 v2.4.1 v2.4.3 v2.4.4
-    v2.5.0 v2.5.1 v2.5.2 v2.5.3 v2.5.4 v2.5.5
+    v2.5.0 v2.5.1 v2.5.2 v2.5.3 v2.5.4 v2.5.5 v2.6.0
 
 tasks:
   default:

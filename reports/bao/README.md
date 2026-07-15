@@ -1,29 +1,29 @@
 # OpenBao Security Evolution Report
 
 [![PDF Report](https://img.shields.io/badge/PDF-Download%20Report-red?style=for-the-badge&logo=adobe)](vulnerability_report.pdf)
-[![OpenBao](https://img.shields.io/badge/OpenBao-v2.4.0--v2.5.5-blue?style=for-the-badge)](https://openbao.org/)
-[![Trivy](https://img.shields.io/badge/Trivy-v0.71.1-green?style=for-the-badge)](https://trivy.dev/)
+[![OpenBao](https://img.shields.io/badge/OpenBao-v2.4.0--v2.6.0-blue?style=for-the-badge)](https://openbao.org/)
+[![Trivy](https://img.shields.io/badge/Trivy-v0.72.0-green?style=for-the-badge)](https://trivy.dev/)
 
-> **Comprehensive security analysis of OpenBao container images from v2.4.0 to v2.5.5**
+> **Comprehensive security analysis of OpenBao container images from v2.4.0 to v2.6.0**
 
 ## 📊 Executive Summary
 
-This report provides an in-depth analysis of OpenBao's security evolution across 9 versions, demonstrating a **95.2% reduction in vulnerabilities** from the earliest to the latest version.
+This report provides an in-depth analysis of OpenBao's security evolution across 11 versions, demonstrating a **94.3% reduction in vulnerabilities** from the earliest to the latest version.
 
 ### Key Findings
 
 | Metric | Value |
 |--------|-------|
-| **Best Version** | v2.5.4 (Security Score: 94.9/100) |
+| **Best Version** | v2.6.0 (Security Score: 94.7/100) |
 | **Worst Version** | v2.4.0/v2.4.1 (Security Score: 0/100) |
-| **Overall Improvement** | 95.2% reduction (125 → 6 vulnerabilities) |
-| **Critical Vulnerabilities** | 0 in v2.5.4 (was 9 in v2.4.0) |
-| **Recommended for Production** | v2.5.3+ (Score ≥ 87.9/100) |
-| **All CVEs Fixable** | 100% have patches available |
+| **Overall Improvement** | 94.3% reduction (195 → 11 vulnerabilities) |
+| **Critical Vulnerabilities** | 0 since v2.5.3 (was 8 in v2.4.0) |
+| **Recommended for Production** | v2.5.5+ (Score ≥ 93.4/100) |
+| **Most CVEs Fixable** | 90-99% have patches available (1 unfixed Go module advisory since v2.5.5) |
 
 ## 🎯 What's Inside
 
-The **11-page report** includes:
+The **12-page report** includes:
 
 - **📈 Executive Summary Dashboard**: KPI cards with security scores (0-100 scale)
 - **📊 Vulnerability Evolution Charts**: Line and stacked area charts showing trends
@@ -38,25 +38,28 @@ The **11-page report** includes:
 The report analyzes the following OpenBao versions:
 
 ```
-2.4.0 → 2.4.1 → 2.4.3 → 2.4.4 → 2.5.0 → 2.5.1 → 2.5.2 → 2.5.3 → 2.5.4 → 2.5.5
+2.4.0 → 2.4.1 → 2.4.3 → 2.4.4 → 2.5.0 → 2.5.1 → 2.5.2 → 2.5.3 → 2.5.4 → 2.5.5 → 2.6.0
 ```
 
 ### Security Score Evolution
 
 | Version | Critical | High | Medium | Low | Total | Score/100 | Risk Level |
 |---------|----------|------|--------|-----|-------|-----------|------------|
-| 2.4.0   | 9        | 45   | 58     | 13  | 125   | 0.0       | 🔴 HIGH    |
-| 2.5.0   | 7        | 35   | 16     | 8   | 66    | 35.9      | 🟠 MEDIUM  |
-| 2.5.3   | 0        | 9    | 4      | 1   | 14    | 87.9      | 🟢 LOW     |
-| 2.5.4   | 0        | 4    | 1      | 1   | 6     | 94.9      | 🟢 LOW     |
-| 2.5.5   | 0        | 5    | 3      | 1   | 9     | 92.8      | 🟢 LOW     |
+| 2.4.0   | 8        | 63   | 68     | 52  | 191   | 0.0       | 🔴 HIGH    |
+| 2.5.0   | 8        | 54   | 37     | 30  | 129   | 22.2      | 🟠 MEDIUM  |
+| 2.5.3   | 0        | 28   | 25     | 23  | 76    | 63.5      | 🟠 MEDIUM  |
+| 2.5.4   | 0        | 22   | 22     | 23  | 67    | 69.7      | 🟠 MEDIUM  |
+| 2.5.5   | 0        | 6    | 4      | 1   | 11    | 93.4      | 🟢 LOW     |
+| 2.6.0   | 0        | 5    | 3      | 0   | 8     | 94.7      | 🟢 LOW     |
+
+> Scores were recalculated during the v2.6.0 homogeneous rescan (fresh Trivy DB); v2.5.3/v2.5.4 dropped out of the LOW band as newly-disclosed CVEs were found to retroactively affect them.
 
 ## 🛠️ Methodology
 
 ### Tools Used
 
-- **[Trivy v0.71.1](https://trivy.dev/)**: Container vulnerability scanner
-  - CVE Database updated: 2026-05-20
+- **[Trivy v0.72.0](https://trivy.dev/)**: Container vulnerability scanner
+  - CVE Database updated: 2026-07-16
   - Format: JSON output for reproducibility
 - **[Geol v2.14.0](https://github.com/adriens/geol)**: Product lifecycle information
 - **LaTeX (XeLaTeX)**: Professional PDF report generation
@@ -75,18 +78,18 @@ All scan results (JSON files) are included in this repository for full transpare
 
 ```
 .
-├── vulnerability_report.pdf       # Final report (11 pages)
+├── vulnerability_report.pdf       # Final report (12 pages)
 ├── vulnerability_report.tex       # LaTeX source
-├── openbao_v*.json               # Trivy scan results (9 versions)
+├── openbao_v*.json               # Trivy scan results (11 versions)
 ├── *.sh                          # Analysis scripts
 ├── .gitignore                    # Git ignore patterns
 ├── README.md                     # This file
-└── GEMINI.md                     # Maintenance guide for AI agents
+└── CLAUDE.md                     # Maintenance guide for AI agents
 ```
 
 ## 🔄 Update Process
 
-This report is maintained with the help of AI agents. See [GEMINI.md](GEMINI.md) for detailed maintenance instructions.
+This report is maintained with the help of AI agents. See [CLAUDE.md](CLAUDE.md) for detailed maintenance instructions.
 
 ### Quick Update for New Versions
 
@@ -97,7 +100,7 @@ trivy image --format json --output openbao_vX.Y.Z.json openbao/openbao:X.Y.Z
 # 2. Extract vulnerability counts
 ./extract_vulns.sh
 
-# 3. Update LaTeX document (see GEMINI.md for details)
+# 3. Update LaTeX document (see CLAUDE.md for details)
 
 # 4. Compile report
 xelatex -interaction=nonstopmode vulnerability_report.tex
@@ -108,9 +111,10 @@ xelatex -interaction=nonstopmode vulnerability_report.tex
 
 ### Major Security Milestones
 
-1. **v2.5.0 (Feb 2026)**: 37.1% reduction - Alpine upgrade from 3.22 to 3.23
-2. **v2.5.3 (Apr 2026)**: 75.8% reduction - Elimination of all OS-layer vulnerabilities
-3. **v2.5.4 (May 2026)**: 57.1% reduction - Further application-layer hardening
+1. **v2.5.0 (Feb 2026)**: 22.6% reduction - Alpine upgrade from 3.22 to 3.23
+2. **v2.5.3 (Apr 2026)**: 36.0% reduction - Substantial cut across OS and application layers
+3. **v2.5.5 (Jun 2026)**: 80.2% reduction - Alpine upgrade to 3.24.1 eliminates all OS-layer vulnerabilities
+4. **v2.6.0 (Jul 2026)**: 21.4% reduction - Further application-layer hardening, lowest total to date
 
 ### Versioning Philosophy
 
@@ -124,7 +128,7 @@ This approach is empirically validated by our findings: **consistent minor versi
 
 All raw scan data (JSON files) are committed to this repository to ensure:
 
-- **Reproducibility**: Data reflects CVE database state on 2026-05-20
+- **Reproducibility**: Data reflects CVE database state on 2026-07-16
 - **Auditability**: Full traceability for compliance and security audits
 - **Verifiability**: Anyone can verify the reported numbers
 
@@ -140,12 +144,12 @@ All raw scan data (JSON files) are committed to this repository to ensure:
 ## 📝 License & Attribution
 
 This report was generated with assistance from:
-- **Gemini CLI Agent**: Analysis, data extraction, and LaTeX generation
+- **Claude Code**: Analysis, data extraction, and LaTeX generation
 - **Trivy**: Vulnerability scanning
 - **Geol**: Lifecycle information
 
 ---
 
-**Last Updated**: 2026-05-21  
-**Report Version**: v2.5.4  
-**Scan Date**: 2026-05-20
+**Last Updated**: 2026-07-16  
+**Report Version**: v2.6.0  
+**Scan Date**: 2026-07-16
