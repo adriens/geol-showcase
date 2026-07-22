@@ -2,8 +2,8 @@
 
 This document provides comprehensive methodology and technical guidelines for Claude Code to update the `vulnerability_report.tex` when new versions of OpenBao are released.
 
-**Last Updated**: 2026-07-16 (for OpenBao v2.6.0, Trivy 0.72.0)  
-**Report Features**: 12 pages with Executive Summary, Security Scores, CVE Analysis, Timeline
+**Last Updated**: 2026-07-23 (for OpenBao v2.6.1, Trivy 0.72.0)  
+**Report Features**: 14 pages with Executive Summary, Security Scores, CVE Analysis, Timeline
 
 ## 1. Vulnerability Scanning (Trivy)
 
