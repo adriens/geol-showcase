@@ -1,0 +1,30 @@
+# --- Build Outputs ---
+dist/
+.task/
+
+# --- Python & Environment ---
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.uv/
+
+# --- LaTeX Temporary Files (fallback if not using dist) ---
+*.aux
+*.log
+*.out
+*.toc
+*.pdf
+*.jpg
+*.jpeg
+*.png
+*.nav
+*.snm
+*.vrb
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# --- OS specific ---
+.DS_Store
+Thumbs.db
