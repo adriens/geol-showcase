@@ -3,7 +3,7 @@
 This document provides comprehensive methodology and technical guidelines for Claude Code to update the `vulnerability_report.tex` when new versions of OpenBao are released.
 
 **Last Updated**: 2026-09-24 (for OpenBao v2.7.0, Trivy 0.74.0)  
-**Report Features**: 14 pages with Executive Summary, Security Scores, CVE Analysis, Timeline
+**Report Features**: 17 pages with Executive Summary, Security Scores, CVE Analysis, Timeline, Drift Analysis
 
 ## 1. Vulnerability Scanning (Trivy)
 
@@ -108,8 +108,14 @@ Calculate weighted scores for the Security Posture Score table:
 ./calculate_scores.sh
 ```
 
-Formula: `Score = 100 - (weighted_vulns / max_weighted) × 100`  
+Formula: `Score = 100 - (weighted_vulns / 1000) × 100`  
 Weights: Critical=10, High=5, Medium=2, Low=1
+
+**The denominator 1000 is a FIXED CONSTANT — never derive it from the corpus.**
+An earlier version used the worst version present, which pinned that version to
+0 by construction, re-scaled every score whenever a version was added or the CVE
+DB moved, and made cross-product comparison impossible. Risk bands are set on
+the weighted scale: `>550` HIGH, `250-550` MEDIUM, `<250` LOW.
 
 ### 6.2 CVE Details
 
@@ -172,6 +178,15 @@ Update the following sections in `vulnerability_report.tex`:
 - **Top Recurring CVEs**: Update if new persistent CVEs appear
 - **Detailed CVE Analysis**: Update if CVE landscape changes
 - **Release Timeline Table**: Add new version with date and interval
+
+### 7.4b Drift Analysis (Section "Measuring CVE Database Drift")
+Because scan JSONs are committed, `git log` holds the same image measured on
+several dates. Run `./drift_analysis.sh` after a rescan and refresh:
+- The per-scan-date table and the multi-line drift chart
+- The drift-magnitude table (window, first, latest, change, per-30-days)
+- The decomposition: naive cross-edition delta = real improvement + drift.
+  Compute "real" by scanning both versions on the SAME date; compute "drift"
+  by comparing one image against itself across dates.
 
 ### 7.5 Conclusion
 - Update "latest version" reference
@@ -239,6 +254,7 @@ All scripts are in the same directory:
 | `check_cve_versions.sh` | Check which versions contain specific CVEs |
 | `collect_enhancements_data.sh` | Collect data for all enhancement sections |
 | `get_cve_details.sh` | Extract detailed CVE information (CVSS, packages) |
+| `drift_analysis.sh` | Re-read committed scans from git history to measure CVE DB drift |
 
 ## 11. Consistency Rules
 
@@ -298,6 +314,8 @@ Current report structure (14 pages):
 
 ## 14. Future Enhancements Ideas
 
+- Add exploitability context (EPSS scores, reachability, distro-vs-NVD severity
+  disagreements -- e.g. CVE-2026-14457 is LOW per Alpine but CVSS 7.5 per NVD)
 - Add trend prediction for next versions
 - Compare with other secret management tools
 - Add cost-of-vulnerability metrics

@@ -15,15 +15,15 @@ This report provides an in-depth analysis of OpenBao's security evolution across
 | Metric | Value |
 |--------|-------|
 | **Best Version** | v2.7.0 (Security Score: 100.0/100) |
-| **Worst Version** | v2.4.0/v2.4.1 (Security Score: 0/100) |
+| **Worst Version** | v2.4.0/v2.4.1 (Security Score: 29.1/100) |
 | **Overall Improvement** | 99.6% reduction (235 → 1 vulnerabilities) |
 | **Critical Vulnerabilities** | 0 since v2.6.0 (was 9 in v2.4.0) |
-| **Recommended for Production** | v2.6.3+ (Score ≥ 95.8/100) |
+| **Recommended for Production** | v2.6.3+ (Score ≥ 97.0/100) |
 | **Most CVEs Fixable** | 97-99% have patches available through v2.6.2; only GO-2026-5932 (unmaintained `x/crypto/openpgp`) remains in v2.7.0, with no upstream fix |
 
 ## 🎯 What's Inside
 
-The **14-page report** includes:
+The **17-page report** includes:
 
 - **📈 Executive Summary Dashboard**: KPI cards with security scores (0-100 scale)
 - **📊 Vulnerability Evolution Charts**: Line and stacked area charts showing trends
@@ -32,6 +32,7 @@ The **14-page report** includes:
 - **⚖️ Version-to-Version Comparison**: Reduction rates between consecutive releases
 - **📋 Risk Level Matrix**: Color-coded assessment for each version
 - **📖 Versioning Policy**: OpenBao's semantic versioning approach (PostgreSQL-like)
+- **📉 CVE Database Drift**: The same images re-measured across 5 scan dates, separating real security work from measurement artifact
 
 ## 📸 Report Preview
 
@@ -46,16 +47,18 @@ The report analyzes the following OpenBao versions:
 
 | Version | Critical | High | Medium | Low | Total | Score/100 | Risk Level |
 |---------|----------|------|--------|-----|-------|-----------|------------|
-| 2.4.0   | 9        | 79   | 79     | 66  | 235   | 0.0       | 🔴 HIGH    |
-| 2.5.0   | 9        | 71   | 48     | 44  | 174   | 17.5      | 🔴 HIGH    |
-| 2.5.3   | 1        | 45   | 36     | 37  | 121   | 51.5      | 🟠 MEDIUM  |
-| 2.5.5   | 1        | 23   | 15     | 15  | 55    | 76.1      | 🟢 LOW     |
-| 2.6.1   | 0        | 20   | 13     | 13  | 47    | 80.4      | 🟢 LOW     |
-| 2.6.2   | 0        | 11   | 12     | 13  | 37    | 87.1      | 🟢 LOW     |
-| 2.6.3   | 0        | 5    | 2      | 1   | 9     | 95.8      | 🟢 LOW     |
+| 2.4.0   | 9        | 79   | 79     | 66  | 235   | 29.1      | 🔴 HIGH    |
+| 2.5.0   | 9        | 71   | 48     | 44  | 174   | 41.5      | 🔴 HIGH    |
+| 2.5.3   | 1        | 45   | 36     | 37  | 121   | 65.6      | 🟠 MEDIUM  |
+| 2.5.5   | 1        | 23   | 15     | 15  | 55    | 83.0      | 🟢 LOW     |
+| 2.6.1   | 0        | 20   | 13     | 13  | 47    | 86.1      | 🟢 LOW     |
+| 2.6.2   | 0        | 11   | 12     | 13  | 37    | 90.8      | 🟢 LOW     |
+| 2.6.3   | 0        | 5    | 2      | 1   | 9     | 97.0      | 🟢 LOW     |
 | 2.7.0   | 0        | 0    | 0      | 0   | 1     | 100.0     | 🟢 LOW     |
 
-> All 15 tags were rescanned in one session against a single Trivy DB (2026-09-24). Counts are **higher** than the previous edition for every version (v2.6.1: 10 → 47, v2.5.5: 15 → 55) purely because the CVE database is four months newer — no image changed. Absolute counts are only meaningful alongside the database date that produced them.
+> **Scoring:** `Score = 100 − (weighted points / 1000) × 100`, weights Critical=10, High=5, Medium=2, Low=1. The denominator is a **fixed constant**, not the worst version in the corpus — so scores are stable across editions and comparable with other products' reports. (Earlier editions normalized against the worst version, which pinned it to 0 by construction.)
+
+> All 15 tags were rescanned in one session against a single Trivy DB (2026-09-24). Counts are **higher** than the previous edition for every version (v2.6.1: 10 → 47, v2.5.5: 15 → 55) purely because the CVE database is four months newer — no image changed. See the drift section below.
 
 ## 🛠️ Methodology
 
@@ -81,7 +84,7 @@ All scan results (JSON files) are included in this repository for full transpare
 
 ```
 .
-├── vulnerability_report.pdf       # Final report (14 pages)
+├── vulnerability_report.pdf       # Final report (17 pages)
 ├── vulnerability_report.tex       # LaTeX source
 ├── openbao_v*.json               # Trivy scan results (15 versions)
 ├── *.sh                          # Analysis scripts
@@ -138,7 +141,22 @@ All raw scan data (JSON files) are committed to this repository to ensure:
 - **Auditability**: Full traceability for compliance and security audits
 - **Verifiability**: Anyone can verify the reported numbers
 
-**Note**: CVE databases evolve daily. Rescanning the same versions at different times will yield different results. The committed JSON files preserve the historical security state.
+**Note**: CVE databases evolve daily. Rescanning the same versions at different times will yield different results. The committed JSON files preserve the historical security state — and because they're in git, the report can *measure* that drift rather than just warn about it.
+
+### Measured Drift
+
+Because every scan is committed, git history holds the same image measured on several dates. Run `./drift_analysis.sh` to reproduce:
+
+| Image | Window | First | Latest | Change | Per 30 days |
+|-------|--------|-------|--------|--------|-------------|
+| 2.4.0 | 126 d  | 125   | 235    | +110 (+88%)  | +26.2 |
+| 2.5.0 | 126 d  | 66    | 174    | +108 (+164%) | +25.7 |
+| 2.5.5 | 98 d   | 9     | 55     | +46 (+511%)  | +14.1 |
+| 2.6.1 | 63 d   | 10    | 47     | +37 (+370%)  | +17.6 |
+
+None of these images was rebuilt. An unchanged OpenBao image accrues roughly **14–26 newly-disclosed findings per month**.
+
+This matters for reading any single number. Comparing the previous edition's best version (v2.6.1 at 10) with this edition's best (v2.7.0 at 1) suggests a 9-finding gain. Scanning both on the same day shows the real figure is **46** — five times larger — with +37 of drift masking it.
 
 ## 📚 References
 
