@@ -2,7 +2,7 @@
 
 This document provides comprehensive methodology and technical guidelines for Claude Code to update the `vulnerability_report.tex` when new versions of OpenBao are released.
 
-**Last Updated**: 2026-07-23 (for OpenBao v2.6.1, Trivy 0.72.0)  
+**Last Updated**: 2026-09-24 (for OpenBao v2.7.0, Trivy 0.74.0)  
 **Report Features**: 14 pages with Executive Summary, Security Scores, CVE Analysis, Timeline
 
 ## 1. Vulnerability Scanning (Trivy)
@@ -87,7 +87,7 @@ Update the following sections in `vulnerability_report.tex`:
 - **`Overall Security Trend Chart` (PGFPlots):** 
     - Add the version to `symbolic x coords`.
     - Add the new data point to each `\addplot` coordinates list.
-- **Title/Abstract:** Ensure the version range (e.g., `v2.4.1 to v2.5.x`) is current.
+- **Title/Abstract:** Ensure the version range (e.g., `v2.4.0 to v2.7.0`) is current.
 
 ## 5. Compilation
 
@@ -144,7 +144,7 @@ Formula: `((prev_total - current_total) / prev_total) × 100`
 Update the following sections in `vulnerability_report.tex`:
 
 ### 7.1 Version References (Multiple Locations)
-- **Title**: Update version range (e.g., "v2.4.0 to v2.5.4")
+- **Title**: Update version range (e.g., "v2.4.0 to v2.7.0")
 - **Abstract**: Update version range
 - **Header (fancyhdr)**: Update version range
 - **PDF Metadata**: Update title, subject keywords
@@ -152,7 +152,7 @@ Update the following sections in `vulnerability_report.tex`:
 - **Tooling section**: Add new version to "Analyzed Image Tags" list
 
 ### 7.2 Executive Summary Dashboard
-- **KPI Cards**: Update current counts for v2.5.X
+- **KPI Cards**: Update current counts for the newest version
 - **Key Takeaways**: Update best/worst versions, percentages
 - **Security Posture Score table**: Add new version row
 - **Risk Level Matrix**: Add new version row with colored cells
@@ -164,7 +164,7 @@ Update the following sections in `vulnerability_report.tex`:
   - Add version to `symbolic x coords`
   - Add data points to each `\addplot` (Critical, High, Medium, Low)
 - **Stacked Area Chart**: Add data points to all four layers
-- **Reduction Rate Table**: Add new transition row (e.g., "2.5.3 → 2.5.4")
+- **Reduction Rate Table**: Add new transition row (e.g., "2.6.3 → 2.7.0")
 
 ### 7.4 Deep Analysis Sections
 - **OS vs. Application Table**: Add new version (OS count, App count, Total)
@@ -242,6 +242,9 @@ All scripts are in the same directory:
 
 ## 11. Consistency Rules
 
+- **Version list lives in 4 places** — keep them in sync when adding a release:
+  `Taskfile.yml` (`VERSIONS`), the `for version in ...` loops in the `*.sh`
+  scripts, the report's "Analyzed Image Tags" list, and every table/chart.
 - **Naming Convention**: Use `openbao_vX.Y.Z.json` for scan results
 - **Color Scheme**: 
   - Critical: Dark Red (#8B0000)
@@ -260,11 +263,19 @@ All scripts are in the same directory:
 3. **Single compilation**: Always compile twice for cross-references
 4. **Ignoring .gitignore**: Don't commit .aux, .log, .out files
 5. **Base image not updated**: Check if Alpine version changed
-6. **CVE database drift**: Note that rescanning produces different results over time
+6. **CVE database drift**: Note that rescanning produces different results over time.
+   This is not hypothetical: the 2026-09-24 rescan raised *every* version's count
+   against the previously published figures (v2.6.1: 10 → 47, v2.5.5: 15 → 55)
+   with no image change. Always restate counts alongside the DB date.
+7. **Same-day releases collide in charts**: v2.6.3 and v2.7.0 both shipped
+   2026-09-23. `symbolic x coords` keys must be unique — use braced, qualified
+   labels such as `{Sep-23 v2.6.3},{Sep-23 v2.7.0}`.
+8. **Don't truncate `\end{document}`**: when replacing the trailing Conclusion
+   section programmatically, slice to the `\end{document}` marker, not to EOF.
 
 ## 13. Report Sections Overview
 
-Current report structure (12 pages):
+Current report structure (14 pages):
 
 1. **Title & Abstract** (1 page)
 2. **Executive Summary** (2 pages)
