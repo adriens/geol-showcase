@@ -2,8 +2,8 @@
 
 This document provides comprehensive methodology and technical guidelines for Claude Code to update the `vulnerability_report.tex` when new versions of OpenBao are released.
 
-**Last Updated**: 2026-09-24 (for OpenBao v2.7.0, Trivy 0.74.0)  
-**Report Features**: 17 pages with Executive Summary, Security Scores, CVE Analysis, Timeline, Drift Analysis
+**Last Updated**: 2026-11-01 (for OpenBao v2.7.2, Trivy 0.76.1)  
+**Report Features**: 19 pages with Executive Summary, Security Scores, CVE Analysis, Timeline, Drift Analysis
 
 ## 1. Vulnerability Scanning (Trivy)
 
@@ -288,6 +288,19 @@ All scripts are in the same directory:
    labels such as `{Sep-23 v2.6.3},{Sep-23 v2.7.0}`.
 8. **Don't truncate `\end{document}`**: when replacing the trailing Conclusion
    section programmatically, slice to the `\end{document}` marker, not to EOF.
+9. **Go pseudo-version false positives**: up to v2.6.5 the `bao` binary records
+   its root module as `github.com/openbao/openbao v0.0.0-<date>-<sha>`, which
+   sorts below every semver fixed version, so Trivy flags 7 already-fixed core
+   advisories (CVE-2024-8185, -9180, CVE-2025-59043, -64761, CVE-2026-45808,
+   -46358, -46405) on every 2.x build. From v2.7.0 the module is
+   `github.com/openbao/openbao/v2 v2.7.x` and they vanish. This is NOT a code
+   fix — an earlier edition misreported it as one. Check with
+   `trivy image --list-all-pkgs` before attributing a count change to a fix.
+10. **Parallel lines**: since 2026-09-23, 2.6.x and 2.7.x ship in same-day pairs.
+    Charts are in version order, so 2.6.5 → 2.7.0 shows an upward step that is
+    a change of line, not a regression. Reduction-rate rows are per line.
+11. **`xtick=data` only uses the FIRST plot's coordinates**: with several
+    `\addplot`s on different x subsets, pass an explicit `xtick={...}`.
 
 ## 13. Report Sections Overview
 

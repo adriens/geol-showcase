@@ -12,7 +12,7 @@
 # against other products' reports. A fixed reference ceiling fixes all three.
 MAX_WEIGHTED=1000
 
-VERSIONS="2.4.0 2.4.1 2.4.3 2.4.4 2.5.0 2.5.1 2.5.2 2.5.3 2.5.4 2.5.5 2.6.0 2.6.1 2.6.2 2.6.3 2.7.0"
+VERSIONS="2.4.0 2.4.1 2.4.3 2.4.4 2.5.0 2.5.1 2.5.2 2.5.3 2.5.4 2.5.5 2.6.0 2.6.1 2.6.2 2.6.3 2.6.4 2.6.5 2.7.0 2.7.1 2.7.2"
 
 # Risk bands, expressed on the weighted scale (round numbers by design):
 #   weighted > 550  -> HIGH    (score < 45)
